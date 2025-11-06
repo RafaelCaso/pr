@@ -1,4 +1,5 @@
 import './App.css'
+import { LoginOrSignup } from './ui/StytchLogin'
 
 function App() {
  
@@ -8,6 +9,7 @@ function App() {
         <h1>
           hello world
         </h1>
+        <LoginOrSignup />
       </div>
     </>
   )
