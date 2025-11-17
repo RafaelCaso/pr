@@ -50,6 +50,30 @@ export const createUser = async (userData: CreateUserData): Promise<User> => {
   return response.data;
 };
 
+// Create or get user - GET first to avoid 409 errors
+export const createOrGetUser = async (stytchId: string): Promise<User> => {
+  // First, try to get the user
+  try {
+    const user = await getUserByStytchId(stytchId);
+    return user;
+  } catch (error: any) {
+    // If user doesn't exist (404), create them
+    if (error.status === 404 || error.message?.includes('not found')) {
+      const response = await fetchAPI('/user/create', {
+        method: 'POST',
+        body: JSON.stringify({ stytchId }),
+      }) as ApiResponse<User>;
+      
+      if (!response.data) {
+        throw new Error(response.message || 'Failed to create user');
+      }
+      return response.data;
+    }
+    // For other errors, re-throw
+    throw error;
+  }
+};
+
 export const updateUser = async (stytchId: string, updates: UpdateUserData): Promise<User> => {
   const response = await fetchAPI(`/user/update/${encodeURIComponent(stytchId)}`, {
     method: 'PUT',
@@ -98,22 +122,13 @@ export const useUpdateUser = () => {
 
 // Get or Create User Hook (handles create-if-not-exists pattern)
 // Uses Option B: POST always, handle 409 and extract user (more efficient)
+// Uses createOrGetUser which handles 409 gracefully without throwing
 export const useGetOrCreateUser = (stytchId: string | null) => {
   const queryClient = useQueryClient();
   
-  // Custom mutation that treats 409 as success (user already exists)
+  // Custom mutation that uses createOrGetUser (handles 409 gracefully)
   const getOrCreateMutation = useMutation({
-    mutationFn: async (stytchId: string) => {
-      try {
-        return await createUser({ stytchId });
-      } catch (error: any) {
-        // If 409 (user already exists), extract user from response and treat as success
-        if (error.status === 409 && error.data) {
-          return error.data;
-        }
-        throw error;
-      }
-    },
+    mutationFn: createOrGetUser,
     onSuccess: (data, stytchId) => {
       // Update cache with user data
       queryClient.setQueryData(['user', stytchId], data);
