@@ -123,10 +123,17 @@ export const prayerRequestOperations = {
     const commitments = await PrayerCommitmentModel.find({ userId })
       .populate({
         path: 'prayerRequestId',
-        populate: {
-          path: 'userId',
-          select: 'firstName lastName',
-        },
+        populate: [
+          {
+            path: 'userId',
+            select: 'firstName lastName',
+          },
+          {
+            path: 'groupId',
+            select: 'name', // Populate group with name field (future: when Group model exists)
+            // Note: This will work once Group model is created. For now, it will just return the ObjectId.
+          },
+        ],
       })
       .sort({ createdAt: -1 })
       .exec();

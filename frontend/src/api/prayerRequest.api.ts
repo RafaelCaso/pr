@@ -8,7 +8,7 @@ export interface PrayerRequest {
   userId: string | { _id: string; firstName?: string; lastName?: string } | null; // string for anonymous, object for populated, null if not set
   isAnonymous: boolean;
   prayerCount: number;
-  groupId?: string | null;
+  groupId?: string | { _id: string; name?: string } | null; // string/ObjectId for unpopulated, object for populated Group, null for public
   reportCount: number;
   status: 'active' | 'under_review' | 'reviewed';
   reviewedBy?: string | null;

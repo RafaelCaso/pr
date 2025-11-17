@@ -74,6 +74,19 @@ export const PrayerRequestCard = ({ prayerRequest }: PrayerRequestCardProps) => 
     // Fallback to Anonymous if we don't have user info
     return 'Anonymous';
   };
+
+  // Get group name for display
+  const getGroupName = () => {
+    if (!prayerRequest.groupId) {
+      return null; // Public request, no group
+    }
+    if (typeof prayerRequest.groupId === 'object' && prayerRequest.groupId.name) {
+      return prayerRequest.groupId.name;
+    }
+    // If groupId is just a string/ObjectId (not populated), return null for now
+    // Once Group model exists and is populated, this will show the group name
+    return null;
+  };
   
   return (
     <div style={{ 
@@ -96,6 +109,11 @@ export const PrayerRequestCard = ({ prayerRequest }: PrayerRequestCardProps) => 
       }}>
         <div>
           <span>By: {getAuthorName()}</span>
+          {getGroupName() && (
+            <span style={{ marginLeft: '16px', fontStyle: 'italic' }}>
+              Group: {getGroupName()}
+            </span>
+          )}
           <span style={{ marginLeft: '16px' }}>
             {prayerRequest.prayerCount} {prayerRequest.prayerCount === 1 ? 'person is' : 'people are'} praying
           </span>
