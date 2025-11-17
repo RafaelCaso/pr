@@ -6,9 +6,10 @@ import { useStytchUserSync } from '../hooks/useStytchUserSync';
 
 interface HeaderProps {
   onShowSettings?: () => void;
+  onShowPrayerList?: () => void;
 }
 
-export const Header = ({ onShowSettings }: HeaderProps = {}) => {
+export const Header = ({ onShowSettings, onShowPrayerList }: HeaderProps = {}) => {
   const { session } = useStytchSession();
   const stytch = useStytch();
   const [showLogin, setShowLogin] = useState(false);
@@ -34,6 +35,12 @@ export const Header = ({ onShowSettings }: HeaderProps = {}) => {
     }
   };
 
+  const handlePrayerList = () => {
+    if (onShowPrayerList) {
+      onShowPrayerList();
+    }
+  };
+
   return (
     <header>
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px' }}>
@@ -45,6 +52,9 @@ export const Header = ({ onShowSettings }: HeaderProps = {}) => {
             <DropdownMenu.Content>
               <DropdownMenu.Item onClick={handleSettings}>
                 Settings
+              </DropdownMenu.Item>
+              <DropdownMenu.Item onClick={handlePrayerList}>
+                Prayer List
               </DropdownMenu.Item>
               <DropdownMenu.Item onClick={handleLogout}>
                 Logout

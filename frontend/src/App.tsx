@@ -2,21 +2,26 @@ import { useState } from 'react'
 import './App.css'
 import { Header } from './ui/Header'
 import { Settings } from './ui/Settings'
+import { LandingPage } from './ui/LandingPage'
+import { PrayerListPage } from './ui/PrayerListPage'
+
+type Page = 'landing' | 'settings' | 'prayerList'
 
 function App() {
-  const [showSettings, setShowSettings] = useState(false)
+  const [currentPage, setCurrentPage] = useState<Page>('landing')
 
   return (
     <>
-      <Header onShowSettings={() => setShowSettings(true)} />
-      {showSettings ? (
-        <Settings onBack={() => setShowSettings(false)} />
+      <Header 
+        onShowSettings={() => setCurrentPage('settings')}
+        onShowPrayerList={() => setCurrentPage('prayerList')}
+      />
+      {currentPage === 'settings' ? (
+        <Settings onBack={() => setCurrentPage('landing')} />
+      ) : currentPage === 'prayerList' ? (
+        <PrayerListPage onBack={() => setCurrentPage('landing')} />
       ) : (
-        <div>
-          <h1>
-            hello world
-          </h1>
-        </div>
+        <LandingPage />
       )}
     </>
   )
