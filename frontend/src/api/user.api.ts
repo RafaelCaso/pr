@@ -30,11 +30,30 @@ export interface UpdateUserData {
 
 // API Functions
 export const getUserByStytchId = async (stytchId: string): Promise<User> => {
-  const response = await fetchAPI(`/user/get?stytchId=${encodeURIComponent(stytchId)}`) as ApiResponse<User>;
-  if (!response.data) {
-    throw new Error(response.message || 'User not found');
+  try {
+    const response = await fetchAPI(`/user/get?stytchId=${encodeURIComponent(stytchId)}`) as ApiResponse<User>;
+    if (!response.data) {
+      const error: any = new Error(response.message || 'User not found');
+      error.status = 404;
+      error.isExpected = true; // Mark as expected for silent handling
+      throw error;
+    }
+    return response.data;
+  } catch (error: any) {
+    // Preserve status from fetchAPI errors
+    if (error.status) {
+      // Mark 404s as expected for silent handling
+      if (error.status === 404) {
+        error.isExpected = true;
+      }
+      throw error;
+    }
+    // If no status, assume 404
+    const err: any = error instanceof Error ? error : new Error('User not found');
+    err.status = 404;
+    err.isExpected = true;
+    throw err;
   }
-  return response.data;
 };
 
 export const createUser = async (userData: CreateUserData): Promise<User> => {
@@ -57,6 +76,7 @@ export const createOrGetUser = async (stytchId: string): Promise<User> => {
     return user;
   } catch (error: any) {
     // If user doesn't exist (404), create them
+    // Silently handle expected 404s - don't log to console
     if (error.status === 404 || error.message?.includes('not found')) {
       const response = await fetchAPI('/user/create', {
         method: 'POST',
@@ -104,6 +124,9 @@ export const useUpdateUser = () => {
 export const useGetOrCreateUser = (stytchId: string | null) => {
   const queryClient = useQueryClient();
   
+  // Check cache first
+  const cachedUser = queryClient.getQueryData<User>(['user', stytchId]);
+  
   // Custom mutation that uses createOrGetUser (GET first, then POST if needed)
   const getOrCreateMutation = useMutation({
     mutationFn: createOrGetUser,
@@ -115,11 +138,19 @@ export const useGetOrCreateUser = (stytchId: string | null) => {
   
   const getOrCreate = async () => {
     if (!stytchId) return null;
+    
+    // If user is already in cache, return it
+    const cached = queryClient.getQueryData<User>(['user', stytchId]);
+    if (cached) {
+      return cached;
+    }
+    
+    // Otherwise, fetch or create
     return await getOrCreateMutation.mutateAsync(stytchId);
   };
   
   return {
-    user: queryClient.getQueryData<User>(['user', stytchId]),
+    user: cachedUser,
     isLoading: getOrCreateMutation.isPending,
     error: getOrCreateMutation.error,
     getOrCreate,

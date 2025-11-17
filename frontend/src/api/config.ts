@@ -22,6 +22,8 @@ export const fetchAPI = async (endpoint: string, options?: RequestInit) => {
       status: response.status,
       message: responseData.message || response.statusText,
       data: responseData.data || null,
+      // Mark 404s as expected for silent handling
+      isExpected: response.status === 404,
     };
     throw error;
   }

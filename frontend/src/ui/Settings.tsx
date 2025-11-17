@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react';
 import { useStytchSession } from '@stytch/react';
 import { useStytchUserSync } from '../hooks/useStytchUserSync';
 import { useUpdateUser } from '../api/user.api';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 
 export const Settings = ({ onBack }: { onBack: () => void }) => {
   const { session } = useStytchSession();
   const { user } = useStytchUserSync();
   const updateUserMutation = useUpdateUser();
+  
+  // Redirect to home if user logs out
+  useRequireAuth(onBack);
   
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');

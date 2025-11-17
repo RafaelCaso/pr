@@ -18,11 +18,19 @@ export const useStytchUserSync = () => {
     // Only sync if:
     // 1. We have a stytchId
     // 2. We haven't already synced for this stytchId
-    // 3. We don't already have a user
+    // 3. We don't already have a user (either from cache or from previous sync)
     // 4. We're not currently loading
     if (stytchId && syncedStytchIdRef.current !== stytchId && !user && !isLoading) {
       syncedStytchIdRef.current = stytchId;
-      getOrCreate();
+      getOrCreate().catch((error) => {
+        // Silently handle errors - they're already logged by the mutation
+        console.error('Error syncing user:', error);
+      });
+    }
+    
+    // If user exists, mark as synced
+    if (user && stytchId && syncedStytchIdRef.current !== stytchId) {
+      syncedStytchIdRef.current = stytchId;
     }
     
     // Reset ref if stytchId changes (user logged out)
