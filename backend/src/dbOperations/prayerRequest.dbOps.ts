@@ -128,11 +128,12 @@ export const prayerRequestOperations = {
             path: 'userId',
             select: 'firstName lastName',
           },
-          {
-            path: 'groupId',
-            select: 'name', // Populate group with name field (future: when Group model exists)
-            // Note: This will work once Group model is created. For now, it will just return the ObjectId.
-          },
+          // Note: groupId populate removed until Group model is created
+          // Future: Add groupId populate here when Group model exists:
+          // {
+          //   path: 'groupId',
+          //   select: 'name',
+          // },
         ],
       })
       .sort({ createdAt: -1 })
