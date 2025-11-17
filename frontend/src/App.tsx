@@ -1,15 +1,14 @@
 import './App.css'
-import { LoginOrSignup } from './ui/StytchLogin'
+import { Header } from './ui/Header'
 
 function App() {
- 
   return (
     <>
+      <Header />
       <div>
         <h1>
           hello world
         </h1>
-        <LoginOrSignup />
       </div>
     </>
   )
