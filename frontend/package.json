@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@stytch/react": "^19.15.1",
     "@stytch/vanilla-js": "^5.41.0",
     "react": "^19.1.1",

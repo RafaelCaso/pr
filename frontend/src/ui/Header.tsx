@@ -1,13 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useStytchSession, useStytch } from '@stytch/react';
 import { LoginOrSignup } from './StytchLogin';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
 export const Header = () => {
   const { session } = useStytchSession();
   const stytch = useStytch();
   const [showLogin, setShowLogin] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (session) {
@@ -15,26 +14,9 @@ export const Header = () => {
     }
   }, [session]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-
-    if (showDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showDropdown]);
-
   const handleLogout = async () => {
     if (stytch) {
       await stytch.session.revoke();
-      setShowDropdown(false);
     }
   };
 
@@ -42,16 +24,16 @@ export const Header = () => {
     <header>
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px' }}>
         {session ? (
-          <div ref={dropdownRef} style={{ position: 'relative' }}>
-            <button onClick={() => setShowDropdown(!showDropdown)}>
-              Account
-            </button>
-            {showDropdown && (
-              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '5px', border: '1px solid black', padding: '10px', backgroundColor: 'white' }}>
-                <button onClick={handleLogout}>Logout</button>
-              </div>
-            )}
-          </div>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button>Account</button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content>
+              <DropdownMenu.Item onClick={handleLogout}>
+                Logout
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
         ) : (
           <button onClick={() => setShowLogin(true)}>Login</button>
         )}
