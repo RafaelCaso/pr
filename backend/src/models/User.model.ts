@@ -30,9 +30,6 @@ const UserSchema = new Schema<IUserDocument, UserModelType, IUserMethods>(
   }
 );
 
-// Unique index on stytchId for efficient lookups (unique: true in schema also creates this, but explicit for clarity)
-UserSchema.index({ stytchId: 1 }, { unique: true });
-
 // Create and export the model.
 export const UserModel = model<IUserDocument, UserModelType>('User', UserSchema);
 

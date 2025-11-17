@@ -2,11 +2,19 @@ import { useState, useEffect } from 'react';
 import { useStytchSession, useStytch } from '@stytch/react';
 import { LoginOrSignup } from './StytchLogin';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { useStytchUserSync } from '../hooks/useStytchUserSync';
 
-export const Header = () => {
+interface HeaderProps {
+  onShowSettings?: () => void;
+}
+
+export const Header = ({ onShowSettings }: HeaderProps = {}) => {
   const { session } = useStytchSession();
   const stytch = useStytch();
   const [showLogin, setShowLogin] = useState(false);
+  
+  // Sync user with backend when Stytch session is available
+  useStytchUserSync();
 
   useEffect(() => {
     if (session) {
@@ -20,6 +28,12 @@ export const Header = () => {
     }
   };
 
+  const handleSettings = () => {
+    if (onShowSettings) {
+      onShowSettings();
+    }
+  };
+
   return (
     <header>
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px' }}>
@@ -29,6 +43,9 @@ export const Header = () => {
               <button>Account</button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
+              <DropdownMenu.Item onClick={handleSettings}>
+                Settings
+              </DropdownMenu.Item>
               <DropdownMenu.Item onClick={handleLogout}>
                 Logout
               </DropdownMenu.Item>

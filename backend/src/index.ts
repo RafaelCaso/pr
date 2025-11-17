@@ -1,6 +1,7 @@
 import { userRoutes } from './routes/User.route';
 import { setupGlobalErrorHandlers } from './util';
 import { Elysia } from 'elysia';
+import { cors } from '@elysiajs/cors';
 import { connectMongoose } from './db/connect';
 
 // Connect to MongoDB
@@ -10,7 +11,10 @@ await connectMongoose();
 setupGlobalErrorHandlers();
 
 // Create the Elysia app instance
-const app = new Elysia() 
+const app = new Elysia()
+  // Enable CORS
+  .use(cors())
+  
   // Root route
   .get('/', () => 'Welcome to Your API')
   
@@ -18,6 +22,6 @@ const app = new Elysia()
   .group('/user', app => app.use(userRoutes))
 
 // Start the server
-app.listen({ port: Bun.env.PORT || 3000 });
+app.listen({ port: process.env.PORT || 3000 });
 
 console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
