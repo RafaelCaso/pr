@@ -1,26 +1,31 @@
 import { Context, Static, t } from 'elysia';
 import { userOperations } from '../dbOperations/user.dbOps';
+import { Types } from 'mongoose';
+
+type SetStatus = { status?: number };
 
 // ============================================================================
-// GET endpoint: Get user by Stytch ID
+// GET endpoint: Get current authenticated user
 // ============================================================================
 
-export const getUserByStytchIdPayload = {
-  query: t.Object({
-    stytchId: t.String(),
-  }),
-};
+export const getUserPayload = {};
 
-const getUserByStytchIdType = t.Object(getUserByStytchIdPayload);
-export type GetUserByStytchIdContext = Omit<Context, 'query'> & Static<typeof getUserByStytchIdType>;
+const getUserType = t.Object(getUserPayload);
+export type GetUserContext = Omit<Context, 'query'> & Static<typeof getUserType> & { user?: { stytchId: string; userId: Types.ObjectId | null }; set: SetStatus };
 
-export const getUserByStytchId = async ({ set, query }: GetUserByStytchIdContext) => {
-  const { stytchId } = query;
+export const getUser = async ({ set, user }: GetUserContext) => {
+  if (!user || !user.userId) {
+    set.status = 401;
+    return {
+      message: 'Unauthorized - user not found',
+      data: null,
+    };
+  }
 
   try {
-    const user = await userOperations.findUserByStytchId(stytchId);
+    const userDoc = await userOperations.findUserByStytchId(user.stytchId);
     
-    if (!user) {
+    if (!userDoc) {
       set.status = 404;
       return {
         message: 'User not found',
@@ -31,7 +36,7 @@ export const getUserByStytchId = async ({ set, query }: GetUserByStytchIdContext
     set.status = 200;
     return {
       message: 'User retrieved successfully',
-      data: user,
+      data: userDoc,
     };
   } catch (error) {
     console.error('Error getting user:', error);
@@ -56,10 +61,19 @@ export const createUserPayload = {
 };
 
 const createUserType = t.Object(createUserPayload);
-export type CreateUserContext = Omit<Context, 'body'> & Static<typeof createUserType>;
+export type CreateUserContext = Omit<Context, 'body'> & Static<typeof createUserType> & { user?: { stytchId: string; userId: Types.ObjectId | null }; set: SetStatus };
 
-export const createUser = async ({ set, body }: CreateUserContext) => {
+export const createUser = async ({ set, body, user: contextUser }: CreateUserContext) => {
   const { stytchId, firstName, lastName } = body;
+
+  // Validate that the stytchId in body matches the authenticated user's stytchId
+  if (!contextUser || contextUser.stytchId !== stytchId) {
+    set.status = 403;
+    return {
+      message: 'Stytch ID in request body must match authenticated user',
+      data: null,
+    };
+  }
 
   try {
     // Check if user already exists
@@ -94,13 +108,10 @@ export const createUser = async ({ set, body }: CreateUserContext) => {
 };
 
 // ============================================================================
-// PUT endpoint: Update user by Stytch ID
+// PUT endpoint: Update current authenticated user
 // ============================================================================
 
 export const updateUserPayload = {
-  params: t.Object({
-    stytchId: t.String(),
-  }),
   body: t.Object({
     firstName: t.Optional(t.String()),
     lastName: t.Optional(t.String()),
@@ -108,19 +119,26 @@ export const updateUserPayload = {
 };
 
 const updateUserType = t.Object(updateUserPayload);
-export type UpdateUserContext = Omit<Context, 'params' | 'body'> & Static<typeof updateUserType>;
+export type UpdateUserContext = Omit<Context, 'body'> & Static<typeof updateUserType> & { user?: { stytchId: string; userId: Types.ObjectId | null }; set: SetStatus };
 
-export const updateUser = async ({ set, params, body }: UpdateUserContext) => {
-  const { stytchId } = params;
+export const updateUser = async ({ set, body, user }: UpdateUserContext) => {
+  if (!user || !user.userId) {
+    set.status = 401;
+    return {
+      message: 'Unauthorized - user not found',
+      data: null,
+    };
+  }
+
   const { firstName, lastName } = body;
 
   try {
-    const user = await userOperations.updateUserByStytchId(stytchId, {
+    const userDoc = await userOperations.updateUserByStytchId(user.stytchId, {
       firstName,
       lastName,
     });
 
-    if (!user) {
+    if (!userDoc) {
       set.status = 404;
       return {
         message: 'User not found',
@@ -131,7 +149,7 @@ export const updateUser = async ({ set, params, body }: UpdateUserContext) => {
     set.status = 200;
     return {
       message: 'User updated successfully',
-      data: user,
+      data: userDoc,
     };
   } catch (error) {
     console.error('Error updating user:', error);

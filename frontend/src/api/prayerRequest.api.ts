@@ -24,7 +24,6 @@ export interface ApiResponse<T> {
 }
 
 export interface CreatePrayerRequestData {
-  stytchId: string;
   text: string;
   isAnonymous?: boolean;
 }
@@ -51,7 +50,7 @@ export const createPrayerRequest = async (data: CreatePrayerRequestData): Promis
 };
 
 export const getAllPrayerRequests = async (): Promise<PrayerRequest[]> => {
-  const response = await fetchAPI('/prayer-request/get-all') as ApiResponse<PrayerRequest[]>;
+  const response = await fetchAPI('/prayer-request/get-all', { requireAuth: false }) as ApiResponse<PrayerRequest[]>;
   
   if (!response.data) {
     throw new Error(response.message || 'Failed to get prayer requests');
@@ -60,7 +59,7 @@ export const getAllPrayerRequests = async (): Promise<PrayerRequest[]> => {
 };
 
 export const getPrayerRequestById = async (id: string): Promise<PrayerRequest> => {
-  const response = await fetchAPI(`/prayer-request/get/${encodeURIComponent(id)}`) as ApiResponse<PrayerRequest>;
+  const response = await fetchAPI(`/prayer-request/get/${encodeURIComponent(id)}`, { requireAuth: false }) as ApiResponse<PrayerRequest>;
   
   if (!response.data) {
     throw new Error(response.message || 'Prayer request not found');
@@ -68,10 +67,9 @@ export const getPrayerRequestById = async (id: string): Promise<PrayerRequest> =
   return response.data;
 };
 
-export const deletePrayerRequest = async (id: string, stytchId: string): Promise<void> => {
+export const deletePrayerRequest = async (id: string): Promise<void> => {
   const response = await fetchAPI(`/prayer-request/delete/${encodeURIComponent(id)}`, {
     method: 'DELETE',
-    body: JSON.stringify({ stytchId }),
   }) as ApiResponse<null>;
   
   if (response.error) {
@@ -79,10 +77,9 @@ export const deletePrayerRequest = async (id: string, stytchId: string): Promise
   }
 };
 
-export const togglePrayerCommitment = async (id: string, stytchId: string): Promise<ToggleCommitmentResult> => {
+export const togglePrayerCommitment = async (id: string): Promise<ToggleCommitmentResult> => {
   const response = await fetchAPI(`/prayer-request/toggle-commit/${encodeURIComponent(id)}`, {
     method: 'POST',
-    body: JSON.stringify({ stytchId }),
   }) as ApiResponse<ToggleCommitmentResult>;
   
   if (!response.data) {
@@ -91,8 +88,8 @@ export const togglePrayerCommitment = async (id: string, stytchId: string): Prom
   return response.data;
 };
 
-export const checkPrayerCommitment = async (id: string, stytchId: string): Promise<PrayerCommitmentStatus> => {
-  const response = await fetchAPI(`/prayer-request/check-commit/${encodeURIComponent(id)}?stytchId=${encodeURIComponent(stytchId)}`) as ApiResponse<PrayerCommitmentStatus>;
+export const checkPrayerCommitment = async (id: string): Promise<PrayerCommitmentStatus> => {
+  const response = await fetchAPI(`/prayer-request/check-commit/${encodeURIComponent(id)}`) as ApiResponse<PrayerCommitmentStatus>;
   
   if (!response.data) {
     throw new Error(response.message || 'Failed to check prayer commitment');
@@ -100,8 +97,8 @@ export const checkPrayerCommitment = async (id: string, stytchId: string): Promi
   return response.data;
 };
 
-export const getUserPrayerList = async (stytchId: string): Promise<PrayerRequest[]> => {
-  const response = await fetchAPI(`/prayer-request/my-prayer-list?stytchId=${encodeURIComponent(stytchId)}`) as ApiResponse<PrayerRequest[]>;
+export const getUserPrayerList = async (): Promise<PrayerRequest[]> => {
+  const response = await fetchAPI(`/prayer-request/my-prayer-list`) as ApiResponse<PrayerRequest[]>;
   
   if (!response.data) {
     throw new Error(response.message || 'Failed to get user prayer list');
@@ -141,8 +138,7 @@ export const useDeletePrayerRequest = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, stytchId }: { id: string; stytchId: string }) =>
-      deletePrayerRequest(id, stytchId),
+    mutationFn: (id: string) => deletePrayerRequest(id),
     onSuccess: () => {
       // Invalidate and refetch prayer requests
       queryClient.invalidateQueries({ queryKey: ['prayerRequests'] });
@@ -155,31 +151,29 @@ export const useTogglePrayerCommitment = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ id, stytchId }: { id: string; stytchId: string }) =>
-      togglePrayerCommitment(id, stytchId),
-    onSuccess: (_, variables) => {
+    mutationFn: (id: string) => togglePrayerCommitment(id),
+    onSuccess: (_, id) => {
       // Invalidate and refetch prayer requests and commitment status
       queryClient.invalidateQueries({ queryKey: ['prayerRequests'] });
-      queryClient.invalidateQueries({ queryKey: ['prayerRequest', variables.id] });
-      queryClient.invalidateQueries({ queryKey: ['prayerCommitment', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['prayerRequest', id] });
+      queryClient.invalidateQueries({ queryKey: ['prayerCommitment', id] });
       queryClient.invalidateQueries({ queryKey: ['userPrayerList'] });
     },
   });
 };
 
-export const useCheckPrayerCommitment = (id: string, stytchId: string | null) => {
+export const useCheckPrayerCommitment = (id: string) => {
   return useQuery({
-    queryKey: ['prayerCommitment', id, stytchId],
-    queryFn: () => checkPrayerCommitment(id, stytchId!),
-    enabled: !!id && !!stytchId,
+    queryKey: ['prayerCommitment', id],
+    queryFn: () => checkPrayerCommitment(id),
+    enabled: !!id,
   });
 };
 
-export const useGetUserPrayerList = (stytchId: string | null) => {
+export const useGetUserPrayerList = () => {
   return useQuery({
-    queryKey: ['userPrayerList', stytchId],
-    queryFn: () => getUserPrayerList(stytchId!),
-    enabled: !!stytchId,
+    queryKey: ['userPrayerList'],
+    queryFn: getUserPrayerList,
   });
 };
 

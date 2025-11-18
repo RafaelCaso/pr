@@ -13,12 +13,11 @@ export const PrayerRequestForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!session?.user_id || !text.trim()) return;
+    if (!session || !text.trim()) return;
     
     setIsSubmitting(true);
     try {
       await createMutation.mutateAsync({
-        stytchId: session.user_id,
         text: text.trim(),
         isAnonymous,
       });

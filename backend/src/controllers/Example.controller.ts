@@ -16,6 +16,10 @@ import { Context, Static, t } from 'elysia';
 // Example: import { exampleOperations } from '../../dbOperations/example.dbOps';
 // Or import from the index: import { exampleOperations } from '../../dbOperations';
 
+// Helper type to ensure 'set' property is available in context types
+// This is needed when adding custom properties to context (e.g., user, admin, etc.)
+type SetStatus = { status?: number };
+
 // ============================================================================
 // Example 1: GET endpoint with query parameters
 // ============================================================================
@@ -28,7 +32,7 @@ export const getExamplePayload = {
 };
 
 const getExampleType = t.Object(getExamplePayload);
-export type GetExampleContext = Omit<Context, 'query'> & Static<typeof getExampleType>;
+export type GetExampleContext = Omit<Context, 'query'> & Static<typeof getExampleType> & { set: SetStatus };
 
 export const getExample = async ({ set, query }: GetExampleContext) => {
   const { name, age } = query;
@@ -64,7 +68,7 @@ export const createExamplePayload = {
 };
 
 const createExampleType = t.Object(createExamplePayload);
-export type CreateExampleContext = Omit<Context, 'body'> & Static<typeof createExampleType>;
+export type CreateExampleContext = Omit<Context, 'body'> & Static<typeof createExampleType> & { set: SetStatus };
 
 export const createExample = async ({ set, body }: CreateExampleContext) => {
   const { name, age } = body;
@@ -102,7 +106,7 @@ export const updateExamplePayload = {
 };
 
 const updateExampleType = t.Object(updateExamplePayload);
-export type UpdateExampleContext = Omit<Context, 'params' | 'body'> & Static<typeof updateExampleType>;
+export type UpdateExampleContext = Omit<Context, 'params' | 'body'> & Static<typeof updateExampleType> & { set: SetStatus };
 
 export const updateExample = async ({ set, params, body }: UpdateExampleContext) => {
   const { id } = params;
@@ -137,7 +141,7 @@ export const deleteExamplePayload = {
 };
 
 const deleteExampleType = t.Object(deleteExamplePayload);
-export type DeleteExampleContext = Omit<Context, 'params'> & Static<typeof deleteExampleType>;
+export type DeleteExampleContext = Omit<Context, 'params'> & Static<typeof deleteExampleType> & { set: SetStatus };
 
 export const deleteExample = async ({ set, params }: DeleteExampleContext) => {
   const { id } = params;

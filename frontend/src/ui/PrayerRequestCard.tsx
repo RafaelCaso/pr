@@ -10,7 +10,6 @@ interface PrayerRequestCardProps {
 export const PrayerRequestCard = ({ prayerRequest }: PrayerRequestCardProps) => {
   const { session } = useStytchSession();
   const { user } = useStytchUserSync();
-  const stytchId = session?.user_id || null;
   // Compare MongoDB _id for ownership check
   const getUserIdString = () => {
     if (!prayerRequest.userId) return null;
@@ -21,8 +20,7 @@ export const PrayerRequestCard = ({ prayerRequest }: PrayerRequestCardProps) => 
   const isOwner = user?._id && getUserIdString() && user._id === getUserIdString();
   
   const { data: commitmentStatus, isLoading: checkingCommitment } = useCheckPrayerCommitment(
-    prayerRequest._id,
-    stytchId
+    prayerRequest._id
   );
   
   const toggleCommitmentMutation = useTogglePrayerCommitment();
@@ -32,30 +30,24 @@ export const PrayerRequestCard = ({ prayerRequest }: PrayerRequestCardProps) => 
   const isLoading = toggleCommitmentMutation.isPending || deleteMutation.isPending || checkingCommitment;
   
   const handleToggleCommitment = async () => {
-    if (!stytchId) return;
+    if (!session) return;
     
     try {
-      await toggleCommitmentMutation.mutateAsync({
-        id: prayerRequest._id,
-        stytchId,
-      });
+      await toggleCommitmentMutation.mutateAsync(prayerRequest._id);
     } catch (error) {
       console.error('Error toggling prayer commitment:', error);
     }
   };
   
   const handleDelete = async () => {
-    if (!stytchId || !isOwner) return;
+    if (!session || !isOwner) return;
     
     if (!confirm('Are you sure you want to delete this prayer request?')) {
       return;
     }
     
     try {
-      await deleteMutation.mutateAsync({
-        id: prayerRequest._id,
-        stytchId,
-      });
+      await deleteMutation.mutateAsync(prayerRequest._id);
     } catch (error) {
       console.error('Error deleting prayer request:', error);
     }
@@ -120,7 +112,7 @@ export const PrayerRequestCard = ({ prayerRequest }: PrayerRequestCardProps) => 
         </div>
         
         <div style={{ display: 'flex', gap: '8px' }}>
-          {stytchId && (
+          {session && (
             <button
               onClick={handleToggleCommitment}
               disabled={isLoading}

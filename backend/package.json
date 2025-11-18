@@ -8,7 +8,8 @@
   "dependencies": {
     "@elysiajs/cors": "^1.4.0",
     "elysia": "latest",
-    "mongoose": "^8.19.3"
+    "mongoose": "^8.19.3",
+    "stytch": "^12.43.0"
   },
   "devDependencies": {
     "bun-types": "latest"

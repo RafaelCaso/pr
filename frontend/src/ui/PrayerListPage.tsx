@@ -9,9 +9,8 @@ interface PrayerListPageProps {
 
 export const PrayerListPage = ({ onBack }: PrayerListPageProps) => {
   const { session } = useStytchSession();
-  const stytchId = session?.user_id || null;
   
-  const { data: prayerRequests, isLoading, error } = useGetUserPrayerList(stytchId);
+  const { data: prayerRequests, isLoading, error } = useGetUserPrayerList();
   
   // Redirect to home if user logs out
   useRequireAuth(onBack);

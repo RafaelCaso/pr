@@ -27,16 +27,13 @@ export const Settings = ({ onBack }: { onBack: () => void }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!session?.user_id) return;
+    if (!session) return;
     
     setIsSaving(true);
     try {
       await updateUserMutation.mutateAsync({
-        stytchId: session.user_id,
-        updates: {
-          firstName: firstName.trim() || undefined,
-          lastName: lastName.trim() || undefined,
-        },
+        firstName: firstName.trim() || undefined,
+        lastName: lastName.trim() || undefined,
       });
       // Success - the mutation will update the cache automatically
     } catch (error) {

@@ -29,9 +29,9 @@ export interface UpdateUserData {
 }
 
 // API Functions
-export const getUserByStytchId = async (stytchId: string): Promise<User> => {
+export const getUser = async (): Promise<User> => {
   try {
-    const response = await fetchAPI(`/user/get?stytchId=${encodeURIComponent(stytchId)}`) as ApiResponse<User>;
+    const response = await fetchAPI(`/user/get`) as ApiResponse<User>;
     if (!response.data) {
       const error: any = new Error(response.message || 'User not found');
       error.status = 404;
@@ -69,13 +69,15 @@ export const createUser = async (userData: CreateUserData): Promise<User> => {
 };
 
 // Create or get user - GET first to avoid 409 errors
+// Note: For first-time user creation, we still need stytchId in the body
 export const createOrGetUser = async (stytchId: string): Promise<User> => {
-  // First, try to get the user
+  // First, try to get the user (using authenticated endpoint)
   try {
-    const user = await getUserByStytchId(stytchId);
+    const user = await getUser();
     return user;
   } catch (error: any) {
     // If user doesn't exist (404), create them
+    // For first-time creation, we need to pass stytchId in body
     // Silently handle expected 404s - don't log to console
     if (error.status === 404 || error.message?.includes('not found')) {
       const response = await fetchAPI('/user/create', {
@@ -93,8 +95,8 @@ export const createOrGetUser = async (stytchId: string): Promise<User> => {
   }
 };
 
-export const updateUser = async (stytchId: string, updates: UpdateUserData): Promise<User> => {
-  const response = await fetchAPI(`/user/update/${encodeURIComponent(stytchId)}`, {
+export const updateUser = async (updates: UpdateUserData): Promise<User> => {
+  const response = await fetchAPI(`/user/update`, {
     method: 'PUT',
     body: JSON.stringify(updates),
   }) as ApiResponse<User>;
@@ -110,11 +112,10 @@ export const useUpdateUser = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: ({ stytchId, updates }: { stytchId: string; updates: UpdateUserData }) =>
-      updateUser(stytchId, updates),
+    mutationFn: (updates: UpdateUserData) => updateUser(updates),
     onSuccess: (data) => {
       // Invalidate and refetch user queries
-      queryClient.invalidateQueries({ queryKey: ['user', data.stytchId] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
 };
@@ -125,14 +126,14 @@ export const useGetOrCreateUser = (stytchId: string | null) => {
   const queryClient = useQueryClient();
   
   // Check cache first
-  const cachedUser = queryClient.getQueryData<User>(['user', stytchId]);
+  const cachedUser = queryClient.getQueryData<User>(['user']);
   
   // Custom mutation that uses createOrGetUser (GET first, then POST if needed)
   const getOrCreateMutation = useMutation({
     mutationFn: createOrGetUser,
-    onSuccess: (data, stytchId) => {
+    onSuccess: (data) => {
       // Update cache with user data
-      queryClient.setQueryData(['user', stytchId], data);
+      queryClient.setQueryData(['user'], data);
     },
   });
   
@@ -140,7 +141,7 @@ export const useGetOrCreateUser = (stytchId: string | null) => {
     if (!stytchId) return null;
     
     // If user is already in cache, return it
-    const cached = queryClient.getQueryData<User>(['user', stytchId]);
+    const cached = queryClient.getQueryData<User>(['user']);
     if (cached) {
       return cached;
     }

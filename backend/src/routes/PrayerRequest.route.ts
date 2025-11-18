@@ -5,13 +5,11 @@ import { deletePrayerRequest, deletePrayerRequestPayload } from '@/controllers/P
 import { togglePrayerCommitment, togglePrayerCommitmentPayload } from '@/controllers/PrayerRequest.controller';
 import { checkPrayerCommitment, checkPrayerCommitmentPayload } from '@/controllers/PrayerRequest.controller';
 import { getUserPrayerList, getUserPrayerListPayload } from '@/controllers/PrayerRequest.controller';
+import { authMiddleware } from '@/middleware/auth.middleware';
 import Elysia from 'elysia';
 
 export const prayerRequestRoutes = new Elysia()
-  // POST endpoint with body
-  // Usage: POST /prayer-request/create with body { stytchId: "xxx", text: "Prayer text", isAnonymous: false }
-  .post('/create', createPrayerRequest, createPrayerRequestPayload)
-  
+  // Public endpoints (no authentication required)
   // GET endpoint: Get all public prayer requests
   // Usage: GET /prayer-request/get-all
   .get('/get-all', getAllPrayerRequests, getAllPrayerRequestsPayload)
@@ -20,19 +18,30 @@ export const prayerRequestRoutes = new Elysia()
   // Usage: GET /prayer-request/get/:id
   .get('/get/:id', getPrayerRequestById, getPrayerRequestByIdPayload)
   
-  // DELETE endpoint with URL params and body
-  // Usage: DELETE /prayer-request/delete/:id with body { stytchId: "xxx" }
+  // Protected endpoints (authentication required)
+  .use(authMiddleware)
+  // POST endpoint with body
+  // Usage: POST /prayer-request/create with body { text: "Prayer text", isAnonymous: false }
+  // Requires: Authorization header with Bearer token
+  .post('/create', createPrayerRequest, createPrayerRequestPayload)
+  
+  // DELETE endpoint with URL params
+  // Usage: DELETE /prayer-request/delete/:id
+  // Requires: Authorization header with Bearer token
   .delete('/delete/:id', deletePrayerRequest, deletePrayerRequestPayload)
   
   // POST endpoint: Toggle prayer commitment
-  // Usage: POST /prayer-request/toggle-commit/:id with body { stytchId: "xxx" }
+  // Usage: POST /prayer-request/toggle-commit/:id
+  // Requires: Authorization header with Bearer token
   .post('/toggle-commit/:id', togglePrayerCommitment, togglePrayerCommitmentPayload)
   
   // GET endpoint: Check prayer commitment
-  // Usage: GET /prayer-request/check-commit/:id?stytchId=xxx
+  // Usage: GET /prayer-request/check-commit/:id
+  // Requires: Authorization header with Bearer token
   .get('/check-commit/:id', checkPrayerCommitment, checkPrayerCommitmentPayload)
   
   // GET endpoint: Get user's prayer list
-  // Usage: GET /prayer-request/my-prayer-list?stytchId=xxx
+  // Usage: GET /prayer-request/my-prayer-list
+  // Requires: Authorization header with Bearer token
   .get('/my-prayer-list', getUserPrayerList, getUserPrayerListPayload);
 
