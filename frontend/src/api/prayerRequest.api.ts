@@ -162,11 +162,11 @@ export const useTogglePrayerCommitment = () => {
   });
 };
 
-export const useCheckPrayerCommitment = (id: string) => {
+export const useCheckPrayerCommitment = (id: string, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['prayerCommitment', id],
     queryFn: () => checkPrayerCommitment(id),
-    enabled: !!id,
+    enabled: !!id && enabled,
   });
 };
 

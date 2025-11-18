@@ -5,7 +5,7 @@ import { deletePrayerRequest, deletePrayerRequestPayload } from '@/controllers/P
 import { togglePrayerCommitment, togglePrayerCommitmentPayload } from '@/controllers/PrayerRequest.controller';
 import { checkPrayerCommitment, checkPrayerCommitmentPayload } from '@/controllers/PrayerRequest.controller';
 import { getUserPrayerList, getUserPrayerListPayload } from '@/controllers/PrayerRequest.controller';
-import { authMiddleware } from '@/middleware/auth.middleware';
+import { applyAuthMiddleware } from '@/middleware/auth.middleware';
 import Elysia from 'elysia';
 
 export const prayerRequestRoutes = new Elysia()
@@ -19,7 +19,9 @@ export const prayerRequestRoutes = new Elysia()
   .get('/get/:id', getPrayerRequestById, getPrayerRequestByIdPayload)
   
   // Protected endpoints (authentication required)
-  .use(authMiddleware)
+  // Apply auth middleware inline
+  .derive(applyAuthMiddleware.derive)
+  .onBeforeHandle(applyAuthMiddleware.onBeforeHandle)
   // POST endpoint with body
   // Usage: POST /prayer-request/create with body { text: "Prayer text", isAnonymous: false }
   // Requires: Authorization header with Bearer token

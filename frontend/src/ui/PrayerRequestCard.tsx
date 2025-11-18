@@ -19,8 +19,10 @@ export const PrayerRequestCard = ({ prayerRequest }: PrayerRequestCardProps) => 
   };
   const isOwner = user?._id && getUserIdString() && user._id === getUserIdString();
   
+  // Only check commitment status if user is logged in
   const { data: commitmentStatus, isLoading: checkingCommitment } = useCheckPrayerCommitment(
-    prayerRequest._id
+    prayerRequest._id,
+    !!session // Only enable query if session exists
   );
   
   const toggleCommitmentMutation = useTogglePrayerCommitment();

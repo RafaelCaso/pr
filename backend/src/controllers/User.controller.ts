@@ -14,10 +14,10 @@ const getUserType = t.Object(getUserPayload);
 export type GetUserContext = Omit<Context, 'query'> & Static<typeof getUserType> & { user?: { stytchId: string; userId: Types.ObjectId | null }; set: SetStatus };
 
 export const getUser = async ({ set, user }: GetUserContext) => {
-  if (!user || !user.userId) {
+  if (!user) {
     set.status = 401;
     return {
-      message: 'Unauthorized - user not found',
+      message: 'Unauthorized',
       data: null,
     };
   }
@@ -67,7 +67,18 @@ export const createUser = async ({ set, body, user: contextUser }: CreateUserCon
   const { stytchId, firstName, lastName } = body;
 
   // Validate that the stytchId in body matches the authenticated user's stytchId
-  if (!contextUser || contextUser.stytchId !== stytchId) {
+  if (!contextUser) {
+    console.log('createUser: contextUser is undefined');
+    set.status = 401;
+    return {
+      message: 'Unauthorized',
+      data: null,
+    };
+  }
+
+  console.log('createUser: contextUser.stytchId:', contextUser.stytchId, 'body.stytchId:', stytchId);
+
+  if (contextUser.stytchId !== stytchId) {
     set.status = 403;
     return {
       message: 'Stytch ID in request body must match authenticated user',

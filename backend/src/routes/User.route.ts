@@ -1,12 +1,13 @@
 import { createUser, createUserPayload } from '@/controllers/User.controller';
 import { getUser, getUserPayload } from '@/controllers/User.controller';
 import { updateUser, updateUserPayload } from '@/controllers/User.controller';
-import { authMiddleware } from '@/middleware/auth.middleware';
+import { applyAuthMiddleware } from '@/middleware/auth.middleware';
 import Elysia from 'elysia';
 
 export const userRoutes = new Elysia()
   // Protected endpoints (authentication required)
-  .use(authMiddleware)
+  .derive(applyAuthMiddleware.derive)
+  .onBeforeHandle(applyAuthMiddleware.onBeforeHandle)
   // GET endpoint: Get current authenticated user
   // Usage: GET /user/get
   // Requires: Authorization header with Bearer token
