@@ -1,0 +1,11 @@
+---
+alwaysApply: true
+---
+
+this project is called Pray Requests. Users can create a prayer request which will then be visible on the main feed. Other users can then commit to praying for this request. When another user commits, they will see that pray request in their personal Prayer List. 
+
+Any Model, Controller, and Route will follow the Example templates in each directory (Example.model.ts, Example.route.ts, Example.controller.ts)
+
+Each model will have  dbOps file in the dbOperations directory. This file will handle all db logic for the corresponding model
+
+All backend routes will be accessed through the frontend api directory and each backend model will have a corresponding api.ts file. The api.ts file follows a React useQuery and useMutation pattern
