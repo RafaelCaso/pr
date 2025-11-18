@@ -113,7 +113,7 @@ export const useUpdateUser = () => {
   
   return useMutation({
     mutationFn: (updates: UpdateUserData) => updateUser(updates),
-    onSuccess: (data) => {
+    onSuccess: () => {
       // Invalidate and refetch user queries
       queryClient.invalidateQueries({ queryKey: ['user'] });
     },

@@ -6,6 +6,8 @@ this project is called Prayer Requests. Users can create a prayer request which 
 
 Any Model, Controller, and Route will follow the Example templates in each directory (Example.model.ts, Example.route.ts, Example.controller.ts)
 
+we have middleware for routes that require authentication. It uses Elysia middleware pattern which is very specific and has created lots of problems so be aware of that and try to stay as close to the pattern as possible and avoid unnecessary complexity when possible.
+
 Each model will have  dbOps file in the dbOperations directory. This file will handle all db logic for the corresponding model
 
 All backend routes will be accessed through the frontend api directory and each backend model will have a corresponding api.ts file. The api.ts file follows a React useQuery and useMutation pattern
