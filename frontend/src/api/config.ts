@@ -35,18 +35,10 @@ export const fetchAPI = async (endpoint: string, options?: RequestInit & { requi
       
       if (sessionToken) {
         headers['Authorization'] = `Bearer ${sessionToken}`;
-        console.log('Sending Authorization header for:', endpoint);
-        console.log('Token length:', sessionToken.length);
-        console.log('Token first 20 chars:', sessionToken.substring(0, 20));
-        console.log('Token last 20 chars:', sessionToken.substring(sessionToken.length - 20));
-        console.log('Full token:', sessionToken);
-      } else {
-        console.warn('No session token available for:', endpoint);
       }
     } catch (error) {
       // Session might not be available (user not logged in)
       // This is okay for public endpoints that don't require auth
-      console.warn('Error getting session token for:', endpoint, error);
     }
   }
   

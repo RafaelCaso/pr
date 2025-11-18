@@ -31,18 +31,15 @@ declare module 'elysia' {
  * .guard(authGuard, (app) =>
  *   app
  *     .resolve(authResolve)
- *     .beforeHandle(authBeforeHandle)
+ *     .onBeforeHandle(authBeforeHandle)
  *     .get('/protected-route', handler)
  * )
- * 
- * Note: According to Elysia docs, both resolve and beforeHandle must be inside the guard scope.
- * The plain object should be empty (or contain only validation schema).
  */
 export const authGuard = {};
 
 /**
  * Resolve function to add user to context
- * Must be used inside the guard scope (runs before beforeHandle)
+ * Runs before beforeHandle to populate user in request context
  */
 export const authResolve = async ({ headers }: any): Promise<{ user: { stytchId: string; userId: Types.ObjectId | null } | undefined }> => {
   const authHeader = headers.authorization;
@@ -86,7 +83,7 @@ export const authResolve = async ({ headers }: any): Promise<{ user: { stytchId:
 
 /**
  * BeforeHandle function to check authentication
- * Must be used inside the guard scope (runs after resolve)
+ * Runs after resolve to verify user exists, blocks request if not authenticated
  */
 export const authBeforeHandle = async ({ user, set }: any) => {
   if (!user) {

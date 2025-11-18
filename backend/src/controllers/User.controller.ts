@@ -66,17 +66,13 @@ export type CreateUserContext = Omit<Context, 'body'> & Static<typeof createUser
 export const createUser = async ({ set, body, user: contextUser }: CreateUserContext) => {
   const { stytchId, firstName, lastName } = body;
 
-  // Validate that the stytchId in body matches the authenticated user's stytchId
   if (!contextUser) {
-    console.log('createUser: contextUser is undefined');
     set.status = 401;
     return {
       message: 'Unauthorized',
       data: null,
     };
   }
-
-  console.log('createUser: contextUser.stytchId:', contextUser.stytchId, 'body.stytchId:', stytchId);
 
   if (contextUser.stytchId !== stytchId) {
     set.status = 403;

@@ -25,13 +25,6 @@ const app = new Elysia()
   // Root route
   .get('/', () => 'Welcome to Your API')
   
-  // Test route to verify requests are reaching the backend
-  .get('/test', ({ headers }) => {
-    console.log('[TEST ROUTE] Request received!');
-    console.log('[TEST ROUTE] Headers:', Object.keys(headers));
-    console.log('[TEST ROUTE] Authorization:', headers.authorization || 'NOT PRESENT');
-    return { message: 'Backend is working', headers: Object.keys(headers) };
-  })
   
   // Register routes using .group() pattern for consistency
   .group('/user', app => app.use(userRoutes))

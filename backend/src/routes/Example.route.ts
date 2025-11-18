@@ -3,7 +3,7 @@
  * 
  * Routes should:
  * 1. Import all controllers and their payloads from the controllers directory
- * 2. Import middleware (e.g., authGuard) if routes need authentication
+ * 2. Import middleware (e.g., authGuard, authResolve, authBeforeHandle) if routes need authentication
  * 3. Create a new Elysia instance
  * 4. Define public routes first (no authentication required)
  * 5. Use .guard() to apply middleware to protected routes
@@ -17,10 +17,14 @@
  * - Nested paths: '/shipping-address/add', '/shipping-address/update'
  * 
  * Example with authentication:
+ * import { authGuard, authResolve, authBeforeHandle } from '@/middleware/auth.middleware';
+ * 
  * export const myRoutes = new Elysia()
  *   .get('/public', publicHandler, publicPayload)
  *   .guard(authGuard, (app) =>
  *     app
+ *       .resolve(authResolve)
+ *       .onBeforeHandle(authBeforeHandle)
  *       .get('/protected', protectedHandler, protectedPayload)
  *   );
  */
