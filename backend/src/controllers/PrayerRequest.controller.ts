@@ -32,7 +32,7 @@ export const createPrayerRequestPayload = {
 };
 
 const createPrayerRequestType = t.Object(createPrayerRequestPayload);
-type SetStatus = { status?: number };
+type SetStatus = { status?: number | string | undefined };
 export type CreatePrayerRequestContext = Omit<Context, 'body'> & Static<typeof createPrayerRequestType> & { user?: { stytchId: string; userId: Types.ObjectId | null }; set: SetStatus };
 
 export const createPrayerRequest = async ({ set, body, user }: CreatePrayerRequestContext) => {
@@ -291,7 +291,11 @@ const getUserPrayerListType = t.Object(getUserPrayerListPayload);
 export type GetUserPrayerListContext = Omit<Context, 'query'> & Static<typeof getUserPrayerListType> & { user?: { stytchId: string; userId: Types.ObjectId | null }; set: SetStatus };
 
 export const getUserPrayerList = async ({ set, user }: GetUserPrayerListContext) => {
+  console.log('[getUserPrayerList] Controller called');
+  console.log('[getUserPrayerList] User:', user ? { stytchId: user.stytchId, userId: user.userId?.toString() } : 'null');
+  
   if (!user || !user.userId) {
+    console.log('[getUserPrayerList] User not found or userId is null');
     set.status = 401;
     return {
       message: 'Unauthorized - user not found',
@@ -300,7 +304,9 @@ export const getUserPrayerList = async ({ set, user }: GetUserPrayerListContext)
   }
 
   try {
+    console.log('[getUserPrayerList] Fetching prayer list for user:', user.userId.toString());
     const prayerRequests = await prayerRequestOperations.getUserPrayerList(user.userId);
+    console.log('[getUserPrayerList] Found', prayerRequests.length, 'prayer requests');
     
     // Sanitize anonymous requests
     const sanitized = prayerRequests.map(sanitizePrayerRequest);

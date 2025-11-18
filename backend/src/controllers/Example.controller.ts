@@ -18,7 +18,8 @@ import { Context, Static, t } from 'elysia';
 
 // Helper type to ensure 'set' property is available in context types
 // This is needed when adding custom properties to context (e.g., user, admin, etc.)
-type SetStatus = { status?: number };
+// Note: status can be number (200, 401, etc.) or string ("OK", "Created", etc.) to match Elysia's type system
+type SetStatus = { status?: number | string | undefined };
 
 // ============================================================================
 // Example 1: GET endpoint with query parameters

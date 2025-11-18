@@ -23,49 +23,46 @@ declare module 'elysia' {
 }
 
 /**
- * Authentication middleware that validates Stytch session tokens
- * Extracts user ID from token and attaches to context
+ * Authentication guard for Elysia
+ * Validates Stytch session tokens and attaches user to context
  * Returns 401 for invalid/missing tokens
+ * 
+ * Usage:
+ * .guard(authGuard, (app) =>
+ *   app
+ *     .resolve(authResolve)
+ *     .beforeHandle(authBeforeHandle)
+ *     .get('/protected-route', handler)
+ * )
+ * 
+ * Note: According to Elysia docs, both resolve and beforeHandle must be inside the guard scope.
+ * The plain object should be empty (or contain only validation schema).
  */
-const deriveAuth = async ({ headers, path, set }: any) => {
-  // Log immediately to verify middleware is being called
-  console.log('========================================');
-  console.log(`[authMiddleware] DERIVE STARTING - PATH: ${path}`);
-  console.log(`[authMiddleware] Authorization header present:`, !!headers.authorization);
-  if (headers.authorization) {
-    console.log(`[authMiddleware] Auth header:`, headers.authorization.substring(0, 50) + '...');
-  }
-  console.log(`[authMiddleware] All header keys:`, Object.keys(headers));
-  console.log('========================================');
-  
-  // Extract session token from Authorization header
+export const authGuard = {};
+
+/**
+ * Resolve function to add user to context
+ * Must be used inside the guard scope (runs before beforeHandle)
+ */
+export const authResolve = async ({ headers }: any): Promise<{ user: { stytchId: string; userId: Types.ObjectId | null } | undefined }> => {
   const authHeader = headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log(`[authMiddleware] ${path}: Missing or invalid authorization header`);
-    set.status = 401;
     return {
       user: undefined,
     };
   }
 
-  const sessionToken = authHeader.substring(7); // Remove 'Bearer ' prefix
-  console.log(`[authMiddleware] ${path}: Extracted session token, length:`, sessionToken.length);
+  const sessionToken = authHeader.substring(7);
 
   try {
-    // Validate session token with Stytch
     const session = await stytchClient.sessions.authenticate({
       session_token: sessionToken,
     });
 
-    console.log('[authMiddleware] Stytch session validated, user_id:', session.session.user_id);
-
-    // Get MongoDB user ID from Stytch ID
     const user = await userOperations.findUserByStytchId(session.session.user_id);
     
     if (!user) {
-      // User doesn't exist yet - this is allowed for first-time user creation
-      // Attach only stytchId, without userId (null)
       return {
         user: {
           stytchId: session.session.user_id,
@@ -74,28 +71,25 @@ const deriveAuth = async ({ headers, path, set }: any) => {
       };
     }
 
-    // Attach user info to context
     return {
       user: {
         stytchId: session.session.user_id,
-        userId: user._id,
+        userId: user._id as Types.ObjectId,
       },
     };
   } catch (error) {
-    console.error('[authMiddleware] Authentication error:', error);
-    set.status = 401;
     return {
       user: undefined,
     };
   }
 };
 
-const onBeforeHandleAuth = async ({ user, set, path }: any) => {
-  console.log(`[authMiddleware] ONBEFOREHANDLE - PATH: ${path}, user:`, !!user);
-  
-  // Block request if user is not authenticated
+/**
+ * BeforeHandle function to check authentication
+ * Must be used inside the guard scope (runs after resolve)
+ */
+export const authBeforeHandle = async ({ user, set }: any) => {
   if (!user) {
-    console.log(`[authMiddleware] ${path}: Blocking request - user not authenticated`);
     set.status = 401;
     return {
       message: 'Unauthorized - authentication required',
@@ -103,17 +97,6 @@ const onBeforeHandleAuth = async ({ user, set, path }: any) => {
     };
   }
 };
-
-// Export as an object with the hooks for inline application
-export const applyAuthMiddleware = {
-  derive: deriveAuth,
-  onBeforeHandle: onBeforeHandleAuth,
-};
-
-// Also export as Elysia instance for .use() pattern (if it works)
-export const authMiddleware = new Elysia({ name: 'authMiddleware' })
-  .derive(deriveAuth)
-  .onBeforeHandle(onBeforeHandleAuth);
 
 /**
  * Optional authentication middleware (for endpoints that work with or without auth)

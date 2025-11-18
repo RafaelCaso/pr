@@ -21,22 +21,6 @@ const app = new Elysia()
     exposeHeaders: ['Content-Type'],
   }))
   
-  // Global request logger - this should fire for EVERY request
-  .onRequest(({ request }) => {
-    console.log('========================================');
-    console.log('[GLOBAL] Request received!');
-    console.log('[GLOBAL] Method:', request.method);
-    console.log('[GLOBAL] URL:', request.url);
-    const headerKeys = Array.from(request.headers.keys());
-    console.log('[GLOBAL] Request headers keys:', headerKeys);
-    if (headerKeys.length > 0) {
-      headerKeys.forEach(key => {
-        console.log(`[GLOBAL] Header ${key}:`, request.headers.get(key));
-      });
-    }
-    console.log('[GLOBAL] Authorization header:', request.headers.get('authorization') || request.headers.get('Authorization') || 'NOT FOUND');
-    console.log('========================================');
-  })
   
   // Root route
   .get('/', () => 'Welcome to Your API')

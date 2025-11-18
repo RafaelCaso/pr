@@ -3,15 +3,26 @@
  * 
  * Routes should:
  * 1. Import all controllers and their payloads from the controllers directory
- * 2. Create a new Elysia instance
- * 3. Chain HTTP methods (.get, .post, .put, .delete) with route paths
- * 4. Pass the controller function and its payload to each route
- * 5. Export the routes instance
+ * 2. Import middleware (e.g., authGuard) if routes need authentication
+ * 3. Create a new Elysia instance
+ * 4. Define public routes first (no authentication required)
+ * 5. Use .guard() to apply middleware to protected routes
+ * 6. Chain HTTP methods (.get, .post, .put, .delete) with route paths
+ * 7. Pass the controller function and its payload to each route
+ * 8. Export the routes instance
  * 
  * Route paths can include:
  * - Static paths: '/get', '/create', '/update'
  * - Dynamic params: '/:id', '/user/:userId'
  * - Nested paths: '/shipping-address/add', '/shipping-address/update'
+ * 
+ * Example with authentication:
+ * export const myRoutes = new Elysia()
+ *   .get('/public', publicHandler, publicPayload)
+ *   .guard(authGuard, (app) =>
+ *     app
+ *       .get('/protected', protectedHandler, protectedPayload)
+ *   );
  */
 
 

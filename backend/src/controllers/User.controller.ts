@@ -2,7 +2,7 @@ import { Context, Static, t } from 'elysia';
 import { userOperations } from '../dbOperations/user.dbOps';
 import { Types } from 'mongoose';
 
-type SetStatus = { status?: number };
+type SetStatus = { status?: number | string | undefined };
 
 // ============================================================================
 // GET endpoint: Get current authenticated user

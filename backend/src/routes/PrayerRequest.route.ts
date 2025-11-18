@@ -5,7 +5,7 @@ import { deletePrayerRequest, deletePrayerRequestPayload } from '@/controllers/P
 import { togglePrayerCommitment, togglePrayerCommitmentPayload } from '@/controllers/PrayerRequest.controller';
 import { checkPrayerCommitment, checkPrayerCommitmentPayload } from '@/controllers/PrayerRequest.controller';
 import { getUserPrayerList, getUserPrayerListPayload } from '@/controllers/PrayerRequest.controller';
-import { applyAuthMiddleware } from '@/middleware/auth.middleware';
+import { authGuard, authResolve, authBeforeHandle } from '@/middleware/auth.middleware';
 import Elysia from 'elysia';
 
 export const prayerRequestRoutes = new Elysia()
@@ -19,31 +19,36 @@ export const prayerRequestRoutes = new Elysia()
   .get('/get/:id', getPrayerRequestById, getPrayerRequestByIdPayload)
   
   // Protected endpoints (authentication required)
-  // Apply auth middleware inline
-  .derive(applyAuthMiddleware.derive)
-  .onBeforeHandle(applyAuthMiddleware.onBeforeHandle)
-  // POST endpoint with body
-  // Usage: POST /prayer-request/create with body { text: "Prayer text", isAnonymous: false }
-  // Requires: Authorization header with Bearer token
-  .post('/create', createPrayerRequest, createPrayerRequestPayload)
-  
-  // DELETE endpoint with URL params
-  // Usage: DELETE /prayer-request/delete/:id
-  // Requires: Authorization header with Bearer token
-  .delete('/delete/:id', deletePrayerRequest, deletePrayerRequestPayload)
-  
-  // POST endpoint: Toggle prayer commitment
-  // Usage: POST /prayer-request/toggle-commit/:id
-  // Requires: Authorization header with Bearer token
-  .post('/toggle-commit/:id', togglePrayerCommitment, togglePrayerCommitmentPayload)
-  
-  // GET endpoint: Check prayer commitment
-  // Usage: GET /prayer-request/check-commit/:id
-  // Requires: Authorization header with Bearer token
-  .get('/check-commit/:id', checkPrayerCommitment, checkPrayerCommitmentPayload)
-  
-  // GET endpoint: Get user's prayer list
-  // Usage: GET /prayer-request/my-prayer-list
-  // Requires: Authorization header with Bearer token
-  .get('/my-prayer-list', getUserPrayerList, getUserPrayerListPayload);
+  // Apply auth guard to all routes inside this guard block
+  .guard(authGuard, (app) =>
+    app
+      // Resolve adds user to context (runs first)
+      .resolve(authResolve)
+      // BeforeHandle checks authentication (runs after resolve)
+      .onBeforeHandle(authBeforeHandle)
+      // POST endpoint with body
+      // Usage: POST /prayer-request/create with body { text: "Prayer text", isAnonymous: false }
+      // Requires: Authorization header with Bearer token
+      .post('/create', createPrayerRequest, createPrayerRequestPayload)
+      
+      // DELETE endpoint with URL params
+      // Usage: DELETE /prayer-request/delete/:id
+      // Requires: Authorization header with Bearer token
+      .delete('/delete/:id', deletePrayerRequest, deletePrayerRequestPayload)
+      
+      // POST endpoint: Toggle prayer commitment
+      // Usage: POST /prayer-request/toggle-commit/:id
+      // Requires: Authorization header with Bearer token
+      .post('/toggle-commit/:id', togglePrayerCommitment, togglePrayerCommitmentPayload)
+      
+      // GET endpoint: Check prayer commitment
+      // Usage: GET /prayer-request/check-commit/:id
+      // Requires: Authorization header with Bearer token
+      .get('/check-commit/:id', checkPrayerCommitment, checkPrayerCommitmentPayload)
+      
+      // GET endpoint: Get user's prayer list
+      // Usage: GET /prayer-request/my-prayer-list
+      // Requires: Authorization header with Bearer token
+      .get('/my-prayer-list', getUserPrayerList, getUserPrayerListPayload)
+  );
 
