@@ -344,3 +344,42 @@ export const getUserPrayerList = async ({ set, user }: GetUserPrayerListContext)
   }
 };
 
+// ============================================================================
+// GET endpoint: Get user's own prayer requests (all requests they created)
+// ============================================================================
+
+export const getMyPrayerRequestsPayload = {};
+
+const getMyPrayerRequestsType = t.Object(getMyPrayerRequestsPayload);
+export type GetMyPrayerRequestsContext = Omit<Context, 'query'> & Static<typeof getMyPrayerRequestsType> & { user?: { stytchId: string; userId: Types.ObjectId | null }; set: SetStatus };
+
+export const getMyPrayerRequests = async ({ set, user }: GetMyPrayerRequestsContext) => {
+  if (!user || !user.userId) {
+    set.status = 401;
+    return {
+      message: 'Unauthorized - user not found',
+      data: null,
+    };
+  }
+
+  try {
+    const prayerRequests = await prayerRequestOperations.getMyPrayerRequests(user.userId);
+    
+    // Sanitize anonymous requests
+    const sanitized = prayerRequests.map(sanitizePrayerRequest);
+
+    set.status = 200;
+    return {
+      message: 'User prayer requests retrieved successfully',
+      data: sanitized,
+    };
+  } catch (error) {
+    console.error('Error getting user prayer requests:', error);
+    set.status = 500;
+    return {
+      message: 'Error retrieving user prayer requests',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+};
+

@@ -108,6 +108,15 @@ export const getUserPrayerList = async (): Promise<PrayerRequest[]> => {
   return response.data;
 };
 
+export const getMyPrayerRequests = async (): Promise<PrayerRequest[]> => {
+  const response = await fetchAPI(`/prayer-request/my-requests`) as ApiResponse<PrayerRequest[]>;
+  
+  if (!response.data) {
+    throw new Error(response.message || 'Failed to get my prayer requests');
+  }
+  return response.data;
+};
+
 // React Query Hooks
 export const useCreatePrayerRequest = () => {
   const queryClient = useQueryClient();
@@ -117,6 +126,7 @@ export const useCreatePrayerRequest = () => {
     onSuccess: () => {
       // Invalidate and refetch prayer requests
       queryClient.invalidateQueries({ queryKey: ['prayerRequests'] });
+      queryClient.invalidateQueries({ queryKey: ['myPrayerRequests'] });
     },
   });
 };
@@ -145,6 +155,7 @@ export const useDeletePrayerRequest = () => {
       // Invalidate and refetch prayer requests
       queryClient.invalidateQueries({ queryKey: ['prayerRequests'] });
       queryClient.invalidateQueries({ queryKey: ['userPrayerList'] });
+      queryClient.invalidateQueries({ queryKey: ['myPrayerRequests'] });
     },
   });
 };
@@ -176,6 +187,13 @@ export const useGetUserPrayerList = () => {
   return useQuery({
     queryKey: ['userPrayerList'],
     queryFn: getUserPrayerList,
+  });
+};
+
+export const useGetMyPrayerRequests = () => {
+  return useQuery({
+    queryKey: ['myPrayerRequests'],
+    queryFn: getMyPrayerRequests,
   });
 };
 

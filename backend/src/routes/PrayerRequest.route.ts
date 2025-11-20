@@ -5,6 +5,7 @@ import { deletePrayerRequest, deletePrayerRequestPayload } from '@/controllers/P
 import { togglePrayerCommitment, togglePrayerCommitmentPayload } from '@/controllers/PrayerRequest.controller';
 import { checkPrayerCommitment, checkPrayerCommitmentPayload } from '@/controllers/PrayerRequest.controller';
 import { getUserPrayerList, getUserPrayerListPayload } from '@/controllers/PrayerRequest.controller';
+import { getMyPrayerRequests, getMyPrayerRequestsPayload } from '@/controllers/PrayerRequest.controller';
 import { authGuard, authResolve, authBeforeHandle } from '@/middleware/auth.middleware';
 import Elysia from 'elysia';
 
@@ -50,5 +51,10 @@ export const prayerRequestRoutes = new Elysia()
       // Usage: GET /prayer-request/my-prayer-list
       // Requires: Authorization header with Bearer token
       .get('/my-prayer-list', getUserPrayerList, getUserPrayerListPayload)
+      
+      // GET endpoint: Get user's own prayer requests
+      // Usage: GET /prayer-request/my-requests
+      // Requires: Authorization header with Bearer token
+      .get('/my-requests', getMyPrayerRequests, getMyPrayerRequestsPayload)
   );
 

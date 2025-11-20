@@ -153,6 +153,19 @@ export const prayerRequestOperations = {
   },
 
   /**
+   * Get all prayer requests created by a specific user
+   * Returns all requests the user has created, regardless of group
+   * Sorted by createdAt descending (newest first)
+   */
+  getMyPrayerRequests: async (userId: Types.ObjectId) => {
+    return await PrayerRequestModel.find({ userId })
+      .sort({ createdAt: -1 })
+      .populate('userId', 'firstName lastName')
+      .populate('groupId', 'name')
+      .exec();
+  },
+
+  /**
    * Get user MongoDB _id from Stytch ID
    */
   getUserIdFromStytchId: async (stytchId: string): Promise<Types.ObjectId | null> => {
