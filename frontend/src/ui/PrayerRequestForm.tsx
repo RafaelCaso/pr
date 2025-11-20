@@ -2,12 +2,18 @@ import { useState } from 'react';
 import { useStytchSession } from '@stytch/react';
 import { useCreatePrayerRequest } from '../api/prayerRequest.api';
 
-export const PrayerRequestForm = () => {
+interface PrayerRequestFormProps {
+  groupId?: string;
+  onSuccess?: () => void;
+}
+
+export const PrayerRequestForm = ({ groupId, onSuccess }: PrayerRequestFormProps) => {
   const { session } = useStytchSession();
   const createMutation = useCreatePrayerRequest();
   
   const [text, setText] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isPublic, setIsPublic] = useState(false); // "Make request public" checkbox
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,10 +26,16 @@ export const PrayerRequestForm = () => {
       await createMutation.mutateAsync({
         text: text.trim(),
         isAnonymous,
+        groupId,
+        isGroupOnly: groupId ? !isPublic : undefined, // If in group, isGroupOnly is inverse of isPublic
       });
       // Reset form on success
       setText('');
       setIsAnonymous(false);
+      setIsPublic(false);
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error('Error creating prayer request:', error);
     } finally {
@@ -74,6 +86,20 @@ export const PrayerRequestForm = () => {
             <span>Post anonymously</span>
           </label>
         </div>
+        
+        {groupId && (
+          <div style={{ marginBottom: '12px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+                style={{ marginRight: '8px' }}
+              />
+              <span>Make request public (visible in main feed)</span>
+            </label>
+          </div>
+        )}
         
         <button
           type="submit"

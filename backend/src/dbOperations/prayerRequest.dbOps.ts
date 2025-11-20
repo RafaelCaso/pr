@@ -13,23 +13,32 @@ export const prayerRequestOperations = {
   },
 
   /**
-   * Get all public prayer requests (where groupId is null), sorted by createdAt descending (newest first)
-   * 
-   * Future: To support groups, change signature to:
-   * getAllPrayerRequests: async (groupIds?: Types.ObjectId[]) => {
-   *   const query: any = {};
-   *   if (groupIds && groupIds.length > 0) {
-   *     query.groupId = { $in: groupIds };
-   *   } else {
-   *     query.groupId = null; // Public only
-   *   }
-   *   return await PrayerRequestModel.find(query)...
-   * }
+   * Get all public prayer requests (where groupId is null or isGroupOnly is false)
+   * Excludes group-only requests from the main feed
+   * Sorted by createdAt descending (newest first)
    */
   getAllPrayerRequests: async () => {
-    return await PrayerRequestModel.find({ groupId: null })
+    return await PrayerRequestModel.find({
+      $or: [
+        { groupId: null },
+        { isGroupOnly: false }
+      ]
+    })
       .sort({ createdAt: -1 })
       .populate('userId', 'firstName lastName')
+      .populate('groupId', 'name')
+      .exec();
+  },
+
+  /**
+   * Get all prayer requests for a specific group
+   * Returns both group-only and public requests that belong to the group
+   */
+  getGroupPrayerRequests: async (groupId: string) => {
+    return await PrayerRequestModel.find({ groupId })
+      .sort({ createdAt: -1 })
+      .populate('userId', 'firstName lastName')
+      .populate('groupId', 'name')
       .exec();
   },
 
@@ -128,12 +137,10 @@ export const prayerRequestOperations = {
             path: 'userId',
             select: 'firstName lastName',
           },
-          // Note: groupId populate removed until Group model is created
-          // Future: Add groupId populate here when Group model exists:
-          // {
-          //   path: 'groupId',
-          //   select: 'name',
-          // },
+          {
+            path: 'groupId',
+            select: 'name',
+          },
         ],
       })
       .sort({ createdAt: -1 })

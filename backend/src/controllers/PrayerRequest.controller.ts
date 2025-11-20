@@ -1,5 +1,6 @@
 import { Context, Static, t } from 'elysia';
 import { prayerRequestOperations } from '../dbOperations/prayerRequest.dbOps';
+import { groupOperations } from '../dbOperations/group.dbOps';
 import { Types } from 'mongoose';
 
 // Helper function to sanitize anonymous requests in responses
@@ -28,6 +29,8 @@ export const createPrayerRequestPayload = {
   body: t.Object({
     text: t.String(),
     isAnonymous: t.Optional(t.Boolean()),
+    groupId: t.Optional(t.String()),
+    isGroupOnly: t.Optional(t.Boolean()),
   }),
 };
 
@@ -44,15 +47,36 @@ export const createPrayerRequest = async ({ set, body, user }: CreatePrayerReque
     };
   }
 
-  const { text, isAnonymous } = body;
+  const { text, isAnonymous, groupId, isGroupOnly } = body;
 
   try {
+    // Validate group membership if groupId is provided
+    let groupObjectId: Types.ObjectId | null = null;
+    if (groupId) {
+      groupObjectId = new Types.ObjectId(groupId);
+      
+      // Verify user is a member of the group
+      const isMember = await groupOperations.isUserMember(groupId, user.userId);
+      if (!isMember) {
+        set.status = 403;
+        return {
+          message: 'You must be a member of this group to create prayer requests in it',
+          data: null,
+        };
+      }
+    }
+
+    // If groupId is provided, isGroupOnly defaults to true unless explicitly set to false
+    // If groupId is not provided, isGroupOnly must be false
+    const finalIsGroupOnly = groupId ? (isGroupOnly !== false) : false;
+
     const prayerRequest = await prayerRequestOperations.createPrayerRequest({
       text,
       userId: user.userId,
       isAnonymous: isAnonymous || false,
       prayerCount: 0,
-      groupId: null,
+      groupId: groupObjectId,
+      isGroupOnly: finalIsGroupOnly,
       reportCount: 0,
       status: 'active',
       reviewedBy: null,

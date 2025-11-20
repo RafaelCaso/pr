@@ -7,9 +7,10 @@ import { useStytchUserSync } from '../hooks/useStytchUserSync';
 interface HeaderProps {
   onShowSettings?: () => void;
   onShowPrayerList?: () => void;
+  onShowGroups?: () => void;
 }
 
-export const Header = ({ onShowSettings, onShowPrayerList }: HeaderProps = {}) => {
+export const Header = ({ onShowSettings, onShowPrayerList, onShowGroups }: HeaderProps = {}) => {
   const { session } = useStytchSession();
   const stytch = useStytch();
   const [showLogin, setShowLogin] = useState(false);
@@ -41,6 +42,12 @@ export const Header = ({ onShowSettings, onShowPrayerList }: HeaderProps = {}) =
     }
   };
 
+  const handleGroups = () => {
+    if (onShowGroups) {
+      onShowGroups();
+    }
+  };
+
   return (
     <header>
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px' }}>
@@ -50,11 +57,14 @@ export const Header = ({ onShowSettings, onShowPrayerList }: HeaderProps = {}) =
               <button>Account</button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content>
-              <DropdownMenu.Item onClick={handleSettings}>
-                Settings
+              <DropdownMenu.Item onClick={handleGroups}>
+                Groups
               </DropdownMenu.Item>
               <DropdownMenu.Item onClick={handlePrayerList}>
                 Prayer List
+              </DropdownMenu.Item>
+              <DropdownMenu.Item onClick={handleSettings}>
+                Settings
               </DropdownMenu.Item>
               <DropdownMenu.Item onClick={handleLogout}>
                 Logout

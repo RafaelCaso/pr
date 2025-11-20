@@ -26,6 +26,8 @@ export interface ApiResponse<T> {
 export interface CreatePrayerRequestData {
   text: string;
   isAnonymous?: boolean;
+  groupId?: string;
+  isGroupOnly?: boolean;
 }
 
 export interface PrayerCommitmentStatus {

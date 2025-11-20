@@ -7,6 +7,7 @@ export interface IPrayerRequest {
   isAnonymous: boolean;
   prayerCount: number;
   groupId?: Types.ObjectId | null;
+  isGroupOnly: boolean;
   reportCount: number;
   status: 'active' | 'under_review' | 'reviewed';
   reviewedBy?: Types.ObjectId | null;
@@ -32,6 +33,7 @@ const PrayerRequestSchema = new Schema<IPrayerRequestDocument, PrayerRequestMode
     isAnonymous: { type: Boolean, default: false },
     prayerCount: { type: Number, default: 0 },
     groupId: { type: Schema.Types.ObjectId, ref: 'Group', required: false, default: null },
+    isGroupOnly: { type: Boolean, default: false },
     reportCount: { type: Number, default: 0 },
     status: { 
       type: String, 
