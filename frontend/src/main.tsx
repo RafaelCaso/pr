@@ -4,12 +4,15 @@ import './index.css'
 import App from './App.tsx'
 import { StytchProviderWrapper } from './providers/stytchProvider'
 import { QueryProviderWrapper } from './providers/queryProvider'
+import { DeviceProviderWrapper } from './providers/deviceProvider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <StytchProviderWrapper>
       <QueryProviderWrapper>
-        <App />
+        <DeviceProviderWrapper>
+          <App />
+        </DeviceProviderWrapper>
       </QueryProviderWrapper>
     </StytchProviderWrapper>
   </StrictMode>,
