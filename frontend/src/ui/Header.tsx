@@ -9,9 +9,10 @@ interface HeaderProps {
   onShowSettings?: () => void;
   onShowPrayerList?: () => void;
   onShowGroups?: () => void;
+  onShowLanding?: () => void;
 }
 
-export const Header = ({ onShowSettings, onShowPrayerList, onShowGroups }: HeaderProps = {}) => {
+export const Header = ({ onShowSettings, onShowPrayerList, onShowGroups, onShowLanding }: HeaderProps = {}) => {
   const { session } = useStytchSession();
   const stytch = useStytch();
   const [showLogin, setShowLogin] = useState(false);
@@ -50,9 +51,44 @@ export const Header = ({ onShowSettings, onShowPrayerList, onShowGroups }: Heade
     }
   };
 
+  const handleLogoClick = () => {
+    if (onShowLanding) {
+      onShowLanding();
+    }
+  };
+
   return (
     <header className="header">
       <div className="header-content">
+        <button
+          onClick={handleLogoClick}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            marginRight: 'auto'
+          }}
+          aria-label="Go to home"
+        >
+          <img 
+            src="/logo.svg" 
+            alt="Prayer Requests" 
+            style={{
+              height: isMobile ? '32px' : '40px',
+              width: 'auto',
+              transition: 'opacity var(--transition-fast)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '0.8';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '1';
+            }}
+          />
+        </button>
         {session ? (
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>

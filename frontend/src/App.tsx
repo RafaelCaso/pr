@@ -32,6 +32,7 @@ function App() {
         onShowSettings={() => setCurrentPage('settings')}
         onShowPrayerList={() => setCurrentPage('prayerList')}
         onShowGroups={navigateToGroups}
+        onShowLanding={() => setCurrentPage('landing')}
       />
       {currentPage === 'settings' ? (
         <Settings onBack={() => setCurrentPage('landing')} />
