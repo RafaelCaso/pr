@@ -11,7 +11,7 @@ export const LandingPage = () => {
         <div className="page-header">
           <h1 className="page-title">Prayer Requests</h1>
           <p className="page-description">
-            Share your prayer requests and join others in prayer. Together we lift our hearts to God.
+            {/* Share your prayer requests and join others in prayer. Together we lift our hearts to God. */}
           </p>
         </div>
         

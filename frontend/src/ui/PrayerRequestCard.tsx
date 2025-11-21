@@ -100,9 +100,11 @@ export const PrayerRequestCard = ({ prayerRequest }: PrayerRequestCardProps) => 
               Group: {getGroupName()}
             </span>
           )}
-          <span>
-            {prayerRequest.prayerCount} {prayerRequest.prayerCount === 1 ? 'person is' : 'people are'} praying
-          </span>
+          {prayerRequest.prayerCount > 0 && (
+            <span>
+              {prayerRequest.prayerCount} {prayerRequest.prayerCount === 1 ? 'person is' : 'people are'} praying
+            </span>
+          )}
         </div>
         
         <div className="prayer-actions">
