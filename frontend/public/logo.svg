@@ -21,20 +21,22 @@
     <line x1="18" y1="20" x2="18" y2="28" stroke="#3D2817" stroke-width="0.5"/>
     <line x1="14" y1="24" x2="22" y2="24" stroke="#3D2817" stroke-width="0.5"/>
     
+    <!-- Roof sections (drawn before steeple so steeple appears on top) -->
+    <path d="M -30 10 L 0 -10 L 30 10 Z" fill="#A85A4A"/>
+    
     <!-- Bell tower/steeple -->
     <rect x="-6" y="-25" width="12" height="35" fill="#F5F1E8" rx="1"/>
     
-    <!-- Cross on top -->
-    <line x1="0" y1="-30" x2="0" y2="-40" stroke="#D4A574" stroke-width="2.5" stroke-linecap="round"/>
-    <line x1="-4" y1="-35" x2="4" y2="-35" stroke="#D4A574" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Bell tower roof -->
+    <path d="M -6 -25 L 0 -35 L 6 -25 L 6 -10 L -6 -10 Z" fill="#A85A4A"/>
     
     <!-- Bell tower windows -->
     <rect x="-4" y="-15" width="3" height="4" fill="#B85C3A" rx="0.5"/>
     <rect x="1" y="-15" width="3" height="4" fill="#B85C3A" rx="0.5"/>
     
-    <!-- Roof sections -->
-    <path d="M -30 10 L 0 -10 L 30 10 Z" fill="#A85A4A"/>
-    <path d="M -6 -25 L 0 -35 L 6 -25 L 6 -10 L -6 -10 Z" fill="#A85A4A"/>
+    <!-- Cross on top (drawn last so it appears on top) -->
+    <line x1="0" y1="-30" x2="0" y2="-40" stroke="#D4A574" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="-4" y1="-35" x2="4" y2="-35" stroke="#D4A574" stroke-width="2.5" stroke-linecap="round"/>
   </g>
 </svg>
 
