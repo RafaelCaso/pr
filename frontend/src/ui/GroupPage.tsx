@@ -13,7 +13,6 @@ import {
 } from '../api/group.api';
 import { useRequireAuth } from '../hooks/useRequireAuth';
 import { useStytchUserSync } from '../hooks/useStytchUserSync';
-import { useDevice } from '../providers/deviceProvider';
 import { useState } from 'react';
 
 interface GroupPageProps {
@@ -29,7 +28,6 @@ export const GroupPage = ({ groupId, onBack }: GroupPageProps) => {
   const [isEditingMessage, setIsEditingMessage] = useState(false);
   const [displayNameValue, setDisplayNameValue] = useState('');
   const [messageValue, setMessageValue] = useState('');
-  const { isMobile } = useDevice();
   
   const { data: group, isLoading: loadingGroup, error: groupError } = useGetGroupById(groupId);
   const { data: prayerRequests, isLoading: loadingFeed, error: feedError, refetch: refetchFeed } = useGetGroupFeed(groupId);

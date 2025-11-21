@@ -3,13 +3,11 @@ import { useStytchSession } from '@stytch/react';
 import { useStytchUserSync } from '../hooks/useStytchUserSync';
 import { useUpdateUser } from '../api/user.api';
 import { useRequireAuth } from '../hooks/useRequireAuth';
-import { useDevice } from '../providers/deviceProvider';
 
 export const Settings = ({ onBack }: { onBack: () => void }) => {
   const { session } = useStytchSession();
   const { user } = useStytchUserSync();
   const updateUserMutation = useUpdateUser();
-  const { isMobile } = useDevice();
   
   // Redirect to home if user logs out
   useRequireAuth(onBack);

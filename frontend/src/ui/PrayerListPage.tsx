@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { useStytchSession } from '@stytch/react';
 import { PrayerRequestCard } from './PrayerRequestCard';
 import { useGetUserPrayerList, useGetMyPrayerRequests } from '../api/prayerRequest.api';
 import { useRequireAuth } from '../hooks/useRequireAuth';
-import { useDevice } from '../providers/deviceProvider';
 
 interface PrayerListPageProps {
   onBack: () => void;
@@ -12,9 +10,7 @@ interface PrayerListPageProps {
 type Tab = 'committed' | 'myRequests';
 
 export const PrayerListPage = ({ onBack }: PrayerListPageProps) => {
-  const { session } = useStytchSession();
   const [activeTab, setActiveTab] = useState<Tab>('committed');
-  const { isMobile } = useDevice();
   
   const { data: committedRequests, isLoading: isLoadingCommitted, error: committedError } = useGetUserPrayerList();
   const { data: myRequests, isLoading: isLoadingMyRequests, error: myRequestsError } = useGetMyPrayerRequests();

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useStytchSession } from '@stytch/react';
 import { useCreatePrayerRequest } from '../api/prayerRequest.api';
-import { useDevice } from '../providers/deviceProvider';
 
 interface PrayerRequestFormProps {
   groupId?: string;
@@ -11,7 +10,6 @@ interface PrayerRequestFormProps {
 export const PrayerRequestForm = ({ groupId, onSuccess }: PrayerRequestFormProps) => {
   const { session } = useStytchSession();
   const createMutation = useCreatePrayerRequest();
-  const { isMobile } = useDevice();
   
   const [text, setText] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);

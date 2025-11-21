@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useStytchSession } from '@stytch/react';
 import { useCreateGroup } from '../api/group.api';
 import { useRequireAuth } from '../hooks/useRequireAuth';
-import { useDevice } from '../providers/deviceProvider';
 
 interface CreateGroupPageProps {
   onBack: () => void;
@@ -12,7 +11,6 @@ interface CreateGroupPageProps {
 export const CreateGroupPage = ({ onBack, onSuccess }: CreateGroupPageProps) => {
   const { session } = useStytchSession();
   const createMutation = useCreateGroup();
-  const { isMobile } = useDevice();
   
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');

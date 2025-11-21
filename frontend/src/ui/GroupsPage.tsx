@@ -1,7 +1,5 @@
-import { useStytchSession } from '@stytch/react';
 import { useGetMyGroups } from '../api/group.api';
 import { useRequireAuth } from '../hooks/useRequireAuth';
-import { useDevice } from '../providers/deviceProvider';
 
 interface GroupsPageProps {
   onBack: () => void;
@@ -18,8 +16,6 @@ export const GroupsPage = ({
   onNavigateToPublicGroups,
   onNavigateToSearchGroups 
 }: GroupsPageProps) => {
-  const { session } = useStytchSession();
-  const { isMobile } = useDevice();
   
   const { data: groups, isLoading, error } = useGetMyGroups();
   

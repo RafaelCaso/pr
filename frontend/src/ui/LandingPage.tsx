@@ -1,11 +1,9 @@
 import { PrayerRequestForm } from './PrayerRequestForm';
 import { PrayerRequestCard } from './PrayerRequestCard';
 import { useGetAllPrayerRequests } from '../api/prayerRequest.api';
-import { useDevice } from '../providers/deviceProvider';
 
 export const LandingPage = () => {
   const { data: prayerRequests, isLoading, error } = useGetAllPrayerRequests();
-  const { isMobile } = useDevice();
   
   return (
     <div className="page-wrapper">
