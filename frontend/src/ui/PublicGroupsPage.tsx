@@ -1,6 +1,7 @@
 import { useStytchSession } from '@stytch/react';
 import { useGetPublicGroups, useJoinGroup } from '../api/group.api';
 import { useRequireAuth } from '../hooks/useRequireAuth';
+import { useDevice } from '../providers/deviceProvider';
 import { useState } from 'react';
 
 interface PublicGroupsPageProps {
@@ -13,6 +14,7 @@ export const PublicGroupsPage = ({ onBack, onNavigateToGroup }: PublicGroupsPage
   const { data: groups, isLoading, error, refetch } = useGetPublicGroups();
   const joinMutation = useJoinGroup();
   const [joiningGroupId, setJoiningGroupId] = useState<string | null>(null);
+  const { isMobile } = useDevice();
   
   // Redirect to home if user logs out
   useRequireAuth(onBack);
@@ -34,97 +36,75 @@ export const PublicGroupsPage = ({ onBack, onNavigateToGroup }: PublicGroupsPage
   };
   
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <button onClick={onBack}>← Back</button>
-        <h1 style={{ marginTop: '10px' }}>Public Groups</h1>
-        <p style={{ color: '#666' }}>
-          Browse and join public groups. No code required!
-        </p>
-      </div>
-      
-      {isLoading && <p>Loading public groups...</p>}
-      
-      {error && (
-        <p style={{ color: 'red' }}>
-          Error loading public groups. Please try again later.
-        </p>
-      )}
-      
-      {!isLoading && !error && groups && groups.length === 0 && (
-        <div style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
-          <p>No public groups available yet.</p>
+    <div className="page-wrapper">
+      <div className="container-content">
+        <div className="page-header">
+          <button className="btn btn-back" onClick={onBack}>← Back</button>
+          <h1 className="page-title">Public Groups</h1>
+          <p className="page-description">
+            Browse and join public groups. No code required!
+          </p>
         </div>
-      )}
-      
-      {!isLoading && !error && groups && groups.length > 0 && (
-        <div>
-          {groups.map((group) => (
-            <div
-              key={group._id}
-              style={{
-                padding: '16px',
-                border: '1px solid #ccc',
-                borderRadius: '8px',
-                marginBottom: '12px',
-                backgroundColor: '#fff',
-              }}
-            >
-              <h3 style={{ marginTop: 0, marginBottom: '8px' }}>{group.name}</h3>
-              <p style={{ margin: '0 0 12px 0', color: '#666' }}>{group.description}</p>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <span style={{ 
-                  padding: '4px 8px', 
-                  backgroundColor: '#4caf50', 
-                  color: 'white', 
-                  borderRadius: '4px',
-                  fontSize: '12px'
-                }}>
-                  Public
-                </span>
-                {session && (
-                  <>
-                    <button
-                      onClick={() => onNavigateToGroup(group._id)}
-                      style={{
-                        padding: '6px 12px',
-                        backgroundColor: '#2196F3',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                      }}
-                    >
-                      View Group
-                    </button>
-                    <button
-                      onClick={() => handleJoin(group._id)}
-                      disabled={joiningGroupId === group._id || joinMutation.isPending}
-                      style={{
-                        padding: '6px 12px',
-                        backgroundColor: joiningGroupId === group._id ? '#ccc' : '#4caf50',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: joiningGroupId === group._id ? 'not-allowed' : 'pointer',
-                        fontSize: '14px',
-                      }}
-                    >
-                      {joiningGroupId === group._id ? 'Joining...' : 'Join Group'}
-                    </button>
-                  </>
-                )}
-                {!session && (
-                  <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
-                    Please log in to join this group
-                  </p>
-                )}
+        
+        {isLoading && (
+          <div className="loading">
+            <div className="loading-spinner"></div>
+            <span style={{ marginLeft: 'var(--spacing-sm)' }}>Loading public groups...</span>
+          </div>
+        )}
+        
+        {error && (
+          <div className="error-message">
+            Error loading public groups. Please try again later.
+          </div>
+        )}
+        
+        {!isLoading && !error && groups && groups.length === 0 && (
+          <div className="empty-state">
+            <div className="empty-state-icon">👥</div>
+            <div className="empty-state-title">No public groups</div>
+            <div className="empty-state-message">No public groups available yet.</div>
+          </div>
+        )}
+        
+        {!isLoading && !error && groups && groups.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-base)' }}>
+            {groups.map((group) => (
+              <div key={group._id} className="card">
+                <h3 style={{ marginTop: 0, marginBottom: 'var(--spacing-sm)' }}>{group.name}</h3>
+                <p style={{ margin: '0 0 var(--spacing-base) 0', color: 'var(--color-text-secondary)' }}>
+                  {group.description}
+                </p>
+                <div className="flex items-center gap-base" style={{ flexWrap: 'wrap' }}>
+                  <span className="badge badge-success">Public</span>
+                  {session && (
+                    <>
+                      <button
+                        onClick={() => onNavigateToGroup(group._id)}
+                        className={`btn btn-info ${isMobile ? 'btn-sm' : ''}`}
+                      >
+                        View Group
+                      </button>
+                      <button
+                        onClick={() => handleJoin(group._id)}
+                        disabled={joiningGroupId === group._id || joinMutation.isPending}
+                        className={`btn btn-success ${isMobile ? 'btn-sm' : ''}`}
+                      >
+                        {joiningGroupId === group._id ? 'Joining...' : 'Join Group'}
+                      </button>
+                    </>
+                  )}
+                  {!session && (
+                    <p className="text-secondary" style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>
+                      Please log in to join this group
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

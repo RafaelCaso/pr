@@ -2,6 +2,7 @@ import { useStytchSession } from '@stytch/react';
 import type { PrayerRequest } from '../api/prayerRequest.api';
 import { useCheckPrayerCommitment, useTogglePrayerCommitment, useDeletePrayerRequest } from '../api/prayerRequest.api';
 import { useStytchUserSync } from '../hooks/useStytchUserSync';
+import { useDevice } from '../providers/deviceProvider';
 
 interface PrayerRequestCardProps {
   prayerRequest: PrayerRequest;
@@ -10,6 +11,7 @@ interface PrayerRequestCardProps {
 export const PrayerRequestCard = ({ prayerRequest }: PrayerRequestCardProps) => {
   const { session } = useStytchSession();
   const { user } = useStytchUserSync();
+  const { isMobile } = useDevice();
   // Compare MongoDB _id for ownership check
   const getUserIdString = () => {
     if (!prayerRequest.userId) return null;
@@ -83,51 +85,34 @@ export const PrayerRequestCard = ({ prayerRequest }: PrayerRequestCardProps) => 
   };
   
   return (
-    <div style={{ 
-      border: '1px solid #ccc', 
-      borderRadius: '8px', 
-      padding: '16px', 
-      marginBottom: '16px',
-      backgroundColor: '#fff'
-    }}>
-      <div style={{ marginBottom: '12px' }}>
-        <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{prayerRequest.text}</p>
+    <div className="card">
+      <div className="card-body">
+        <p style={{ margin: 0, whiteSpace: 'pre-wrap', lineHeight: 'var(--line-height-relaxed)' }}>
+          {prayerRequest.text}
+        </p>
       </div>
       
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        fontSize: '14px',
-        color: '#666'
-      }}>
-        <div>
+      <div className="card-footer">
+        <div className="prayer-meta">
           <span>By: {getAuthorName()}</span>
           {getGroupName() && (
-            <span style={{ marginLeft: '16px', fontStyle: 'italic' }}>
+            <span style={{ fontStyle: 'italic' }}>
               Group: {getGroupName()}
             </span>
           )}
-          <span style={{ marginLeft: '16px' }}>
+          <span>
             {prayerRequest.prayerCount} {prayerRequest.prayerCount === 1 ? 'person is' : 'people are'} praying
           </span>
         </div>
         
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="prayer-actions">
           {session && (
             <button
               onClick={handleToggleCommitment}
               disabled={isLoading}
-              style={{
-                padding: '6px 12px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                backgroundColor: hasCommitted ? '#ff6b6b' : '#4caf50',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-              }}
+              className={`btn ${hasCommitted ? 'btn-danger' : 'btn-success'} ${isMobile ? 'btn-sm' : ''}`}
             >
-              {hasCommitted ? 'Remove from Prayer List' : "I'll Pray"}
+              {hasCommitted ? (isMobile ? 'Remove' : 'Remove from Prayer List') : "I'll Pray"}
             </button>
           )}
           
@@ -135,14 +120,7 @@ export const PrayerRequestCard = ({ prayerRequest }: PrayerRequestCardProps) => 
             <button
               onClick={handleDelete}
               disabled={isLoading}
-              style={{
-                padding: '6px 12px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                backgroundColor: '#f44336',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-              }}
+              className={`btn btn-danger ${isMobile ? 'btn-sm' : ''}`}
             >
               Delete
             </button>

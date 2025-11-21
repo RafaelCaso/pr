@@ -3,6 +3,7 @@ import { useStytchSession, useStytch } from '@stytch/react';
 import { LoginOrSignup } from './StytchLogin';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { useStytchUserSync } from '../hooks/useStytchUserSync';
+import { useDevice } from '../providers/deviceProvider';
 
 interface HeaderProps {
   onShowSettings?: () => void;
@@ -14,6 +15,7 @@ export const Header = ({ onShowSettings, onShowPrayerList, onShowGroups }: Heade
   const { session } = useStytchSession();
   const stytch = useStytch();
   const [showLogin, setShowLogin] = useState(false);
+  const { isMobile } = useDevice();
   
   // Sync user with backend when Stytch session is available
   useStytchUserSync();
@@ -49,36 +51,56 @@ export const Header = ({ onShowSettings, onShowPrayerList, onShowGroups }: Heade
   };
 
   return (
-    <header>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px' }}>
+    <header className="header">
+      <div className="header-content">
         {session ? (
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <button>Account</button>
+              <button className="btn btn-ghost">Account</button>
             </DropdownMenu.Trigger>
-            <DropdownMenu.Content>
-              <DropdownMenu.Item onClick={handleGroups}>
+            <DropdownMenu.Content className="dropdown-content">
+              <DropdownMenu.Item className="dropdown-item" onClick={handleGroups}>
                 Groups
               </DropdownMenu.Item>
-              <DropdownMenu.Item onClick={handlePrayerList}>
+              <DropdownMenu.Item className="dropdown-item" onClick={handlePrayerList}>
                 Prayer List
               </DropdownMenu.Item>
-              <DropdownMenu.Item onClick={handleSettings}>
+              <DropdownMenu.Item className="dropdown-item" onClick={handleSettings}>
                 Settings
               </DropdownMenu.Item>
-              <DropdownMenu.Item onClick={handleLogout}>
+              <DropdownMenu.Item className="dropdown-item" onClick={handleLogout}>
                 Logout
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Root>
         ) : (
-          <button onClick={() => setShowLogin(true)}>Login</button>
+          <button className="btn btn-primary" onClick={() => setShowLogin(true)}>
+            Login
+          </button>
         )}
       </div>
       {showLogin && !session && (
-        <div>
-          <button onClick={() => setShowLogin(false)}>Close</button>
-          <LoginOrSignup />
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          backgroundColor: 'var(--color-bg-overlay)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          zIndex: 'var(--z-modal)',
+          padding: isMobile ? 'var(--spacing-base)' : 'var(--spacing-xl)'
+        }}>
+          <div className="login-modal">
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--spacing-base)' }}>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowLogin(false)}>
+                Close
+              </button>
+            </div>
+            <LoginOrSignup />
+          </div>
         </div>
       )}
     </header>

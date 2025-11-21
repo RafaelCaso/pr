@@ -3,11 +3,13 @@ import { useStytchSession } from '@stytch/react';
 import { useStytchUserSync } from '../hooks/useStytchUserSync';
 import { useUpdateUser } from '../api/user.api';
 import { useRequireAuth } from '../hooks/useRequireAuth';
+import { useDevice } from '../providers/deviceProvider';
 
 export const Settings = ({ onBack }: { onBack: () => void }) => {
   const { session } = useStytchSession();
   const { user } = useStytchUserSync();
   const updateUserMutation = useUpdateUser();
+  const { isMobile } = useDevice();
   
   // Redirect to home if user logs out
   useRequireAuth(onBack);
@@ -44,49 +46,53 @@ export const Settings = ({ onBack }: { onBack: () => void }) => {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '500px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '20px' }}>
-        <button onClick={onBack}>← Back</button>
-        <h1>Settings</h1>
+    <div className="page-wrapper">
+      <div className="container-form">
+        <div className="page-header">
+          <button className="btn btn-back" onClick={onBack}>← Back</button>
+          <h1 className="page-title">Settings</h1>
+        </div>
+        
+        <div className="card">
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="firstName" className="form-label">
+                First Name
+              </label>
+              <input
+                id="firstName"
+                type="text"
+                className="form-input"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Enter your first name"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="lastName" className="form-label">
+                Last Name
+              </label>
+              <input
+                id="lastName"
+                type="text"
+                className="form-input"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Enter your last name"
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              disabled={isSaving}
+              className="btn btn-primary"
+            >
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
+          </form>
+        </div>
       </div>
-      
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="firstName" style={{ display: 'block', marginBottom: '5px' }}>
-            First Name
-          </label>
-          <input
-            id="firstName"
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            style={{ width: '100%', padding: '8px' }}
-            placeholder="Enter your first name"
-          />
-        </div>
-        
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="lastName" style={{ display: 'block', marginBottom: '5px' }}>
-            Last Name
-          </label>
-          <input
-            id="lastName"
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            style={{ width: '100%', padding: '8px' }}
-            placeholder="Enter your last name"
-          />
-        </div>
-        
-        <button 
-          type="submit" 
-          disabled={isSaving}
-          style={{ padding: '10px 20px', cursor: isSaving ? 'not-allowed' : 'pointer' }}
-        >
-          {isSaving ? 'Saving...' : 'Save'}
-        </button>
-      </form>
     </div>
   );
 };
