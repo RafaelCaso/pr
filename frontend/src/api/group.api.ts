@@ -5,6 +5,7 @@ import { fetchAPI } from './config';
 export interface Group {
   _id: string;
   name: string;
+  displayName?: string;
   description: string;
   code: string;
   isPublic: boolean;
@@ -36,6 +37,29 @@ export interface CreateGroupData {
 
 export interface JoinGroupData {
   code?: string;
+}
+
+export interface GroupMessage {
+  _id: string;
+  groupId: string | Group;
+  userId: string | { _id: string; firstName?: string; lastName?: string };
+  message: string;
+  isPinned: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface UpdateDisplayNameData {
+  displayName: string;
+}
+
+export interface CreateMessageData {
+  message: string;
+  isPinned?: boolean;
+}
+
+export interface UpdateMessageData {
+  message: string;
 }
 
 // API Functions
@@ -167,6 +191,60 @@ export const getGroupCode = async (id: string): Promise<string> => {
   return response.data.code;
 };
 
+export const updateDisplayName = async (id: string, data: UpdateDisplayNameData): Promise<Group> => {
+  const response = await fetchAPI(`/group/update-display-name/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }) as ApiResponse<Group>;
+  
+  if (!response.data) {
+    throw new Error(response.message || 'Failed to update display name');
+  }
+  return response.data;
+};
+
+export const createMessage = async (id: string, data: CreateMessageData): Promise<GroupMessage> => {
+  const response = await fetchAPI(`/group/message/${encodeURIComponent(id)}`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }) as ApiResponse<GroupMessage>;
+  
+  if (!response.data) {
+    throw new Error(response.message || 'Failed to create message');
+  }
+  return response.data;
+};
+
+export const updateMessage = async (id: string, messageId: string, data: UpdateMessageData): Promise<GroupMessage> => {
+  const response = await fetchAPI(`/group/message/${encodeURIComponent(id)}/${encodeURIComponent(messageId)}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }) as ApiResponse<GroupMessage>;
+  
+  if (!response.data) {
+    throw new Error(response.message || 'Failed to update message');
+  }
+  return response.data;
+};
+
+export const getTopMessage = async (id: string): Promise<GroupMessage | null> => {
+  const response = await fetchAPI(`/group/message/top/${encodeURIComponent(id)}`) as ApiResponse<GroupMessage | null>;
+  
+  if (response.error) {
+    throw new Error(response.message || 'Failed to get top message');
+  }
+  return response.data || null;
+};
+
+export const getAllMessages = async (id: string): Promise<GroupMessage[]> => {
+  const response = await fetchAPI(`/group/message/all/${encodeURIComponent(id)}`) as ApiResponse<GroupMessage[]>;
+  
+  if (!response.data) {
+    throw new Error(response.message || 'Failed to get messages');
+  }
+  return response.data;
+};
+
 // React Query Hooks
 export const useCreateGroup = () => {
   const queryClient = useQueryClient();
@@ -291,6 +369,63 @@ export const useGetGroupCode = (id: string, enabled: boolean = true) => {
   return useQuery({
     queryKey: ['groupCode', id],
     queryFn: () => getGroupCode(id),
+    enabled: !!id && enabled,
+  });
+};
+
+export const useUpdateDisplayName = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, displayName }: { id: string; displayName: string }) => updateDisplayName(id, { displayName }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+      queryClient.invalidateQueries({ queryKey: ['myGroups'] });
+      queryClient.invalidateQueries({ queryKey: ['group', variables.id] });
+    },
+  });
+};
+
+export const useCreateMessage = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, message, isPinned }: { id: string; message: string; isPinned?: boolean }) => 
+      createMessage(id, { message, isPinned }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['groupMessage', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['groupTopMessage', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['groupAllMessages', variables.id] });
+    },
+  });
+};
+
+export const useUpdateMessage = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, messageId, message }: { id: string; messageId: string; message: string }) => 
+      updateMessage(id, messageId, { message }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['groupMessage', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['groupTopMessage', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['groupAllMessages', variables.id] });
+    },
+  });
+};
+
+export const useGetTopMessage = (id: string, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ['groupTopMessage', id],
+    queryFn: () => getTopMessage(id),
+    enabled: !!id && enabled,
+  });
+};
+
+export const useGetAllMessages = (id: string, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ['groupAllMessages', id],
+    queryFn: () => getAllMessages(id),
     enabled: !!id && enabled,
   });
 };

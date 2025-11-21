@@ -11,6 +11,11 @@ import { getGroupMembers, getGroupMembersPayload } from '@/controllers/Group.con
 import { makeAdmin, makeAdminPayload } from '@/controllers/Group.controller';
 import { removeMember, removeMemberPayload } from '@/controllers/Group.controller';
 import { getGroupCode, getGroupCodePayload } from '@/controllers/Group.controller';
+import { updateDisplayName, updateDisplayNamePayload } from '@/controllers/Group.controller';
+import { createMessage, createMessagePayload } from '@/controllers/Group.controller';
+import { updateMessage, updateMessagePayload } from '@/controllers/Group.controller';
+import { getTopMessage, getTopMessagePayload } from '@/controllers/Group.controller';
+import { getAllMessages, getAllMessagesPayload } from '@/controllers/Group.controller';
 import { authGuard, authResolve, authBeforeHandle } from '@/middleware/auth.middleware';
 import Elysia from 'elysia';
 
@@ -85,5 +90,30 @@ export const groupRoutes = new Elysia()
       // Usage: GET /group/code/:id
       // Requires: Authorization header with Bearer token
       .get('/code/:id', getGroupCode, getGroupCodePayload)
+      
+      // PUT endpoint: Update group display name (owner/admin only)
+      // Usage: PUT /group/update-display-name/:id with body { displayName: "Display Name" }
+      // Requires: Authorization header with Bearer token
+      .put('/update-display-name/:id', updateDisplayName, updateDisplayNamePayload)
+      
+      // POST endpoint: Create a group message (owner/admin only)
+      // Usage: POST /group/message/:id with body { message: "Message text", isPinned: false }
+      // Requires: Authorization header with Bearer token
+      .post('/message/:id', createMessage, createMessagePayload)
+      
+      // PUT endpoint: Update a group message (owner/admin only)
+      // Usage: PUT /group/message/:id/:messageId with body { message: "Updated message text" }
+      // Requires: Authorization header with Bearer token
+      .put('/message/:id/:messageId', updateMessage, updateMessagePayload)
+      
+      // GET endpoint: Get top message for a group
+      // Usage: GET /group/message/top/:id
+      // Requires: Authorization header with Bearer token (optional - could be public)
+      .get('/message/top/:id', getTopMessage, getTopMessagePayload)
+      
+      // GET endpoint: Get all messages for a group (for future messages tab)
+      // Usage: GET /group/message/all/:id
+      // Requires: Authorization header with Bearer token (optional - could be public)
+      .get('/message/all/:id', getAllMessages, getAllMessagesPayload)
   );
 

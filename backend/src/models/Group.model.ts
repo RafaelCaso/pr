@@ -3,6 +3,7 @@ import { Document, model, Model, Schema, Types } from 'mongoose';
 // Define an interface describing the structure of the document.
 export interface IGroup {
   name: string;
+  displayName?: string; // Optional display name (not unique, defaults to name)
   description: string;
   code: string; // 6-8 character alphanumeric code, stored normalized (uppercase)
   isPublic: boolean;
@@ -25,6 +26,7 @@ export type GroupModelType = Model<IGroupDocument, {}, IGroupMethods>;
 const GroupSchema = new Schema<IGroupDocument, GroupModelType, IGroupMethods>(
   {
     name: { type: String, required: true, unique: true },
+    displayName: { type: String, required: false }, // Optional, not unique, defaults to name
     description: { type: String, required: true },
     code: { type: String, required: true }, // 6-8 alphanumeric, normalized to uppercase
     isPublic: { type: Boolean, default: false },

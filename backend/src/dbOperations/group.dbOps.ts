@@ -46,8 +46,12 @@ export const groupOperations = {
       attempts++;
     }
 
+    // Default displayName to name if not provided
+    const displayName = groupData.displayName || groupData.name;
+
     const group = new GroupModel({
       ...groupData,
+      displayName,
       code: normalizeCode(code),
     });
     const savedGroup = await group.save();
@@ -289,6 +293,26 @@ export const groupOperations = {
   getGroupCode: async (groupId: string) => {
     const group = await GroupModel.findById(groupId).select('code').exec();
     return group?.code || null;
+  },
+
+  /**
+   * Update group display name
+   * Verifies requester is owner or admin
+   */
+  updateDisplayName: async (groupId: string, userId: Types.ObjectId, displayName: string) => {
+    // Verify requester is owner or admin
+    const isAuthorized = await groupOperations.isUserOwnerOrAdmin(groupId, userId);
+    if (!isAuthorized) {
+      throw new Error('Only group owners and admins can update the display name');
+    }
+
+    const group = await GroupModel.findById(groupId);
+    if (!group) {
+      throw new Error('Group not found');
+    }
+
+    group.displayName = displayName.trim();
+    return await group.save();
   },
 };
 

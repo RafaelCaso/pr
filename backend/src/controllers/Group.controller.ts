@@ -1,5 +1,6 @@
 import { Context, Static, t } from 'elysia';
 import { groupOperations } from '../dbOperations/group.dbOps';
+import { groupMessageOperations } from '../dbOperations/groupMessage.dbOps';
 import { prayerRequestOperations } from '../dbOperations/prayerRequest.dbOps';
 import { Types } from 'mongoose';
 
@@ -572,6 +573,234 @@ export const getGroupCode = async ({ set, params, user }: GetGroupCodeContext) =
     set.status = 500;
     return {
       message: 'Error retrieving group code',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+};
+
+// ============================================================================
+// PUT endpoint: Update group display name (owner/admin only)
+// ============================================================================
+
+export const updateDisplayNamePayload = {
+  params: t.Object({
+    id: t.String(),
+  }),
+  body: t.Object({
+    displayName: t.String(),
+  }),
+};
+
+const updateDisplayNameType = t.Object(updateDisplayNamePayload);
+export type UpdateDisplayNameContext = Omit<Context, 'params' | 'body'> & Static<typeof updateDisplayNameType> & { user?: { stytchId: string; userId: Types.ObjectId | null }; set: SetStatus };
+
+export const updateDisplayName = async ({ set, params, body, user }: UpdateDisplayNameContext) => {
+  if (!user || !user.userId) {
+    set.status = 401;
+    return {
+      message: 'Unauthorized - user not found',
+      data: null,
+    };
+  }
+
+  const { id } = params;
+  const { displayName } = body;
+
+  try {
+    const group = await groupOperations.updateDisplayName(id, user.userId, displayName);
+
+    set.status = 200;
+    return {
+      message: 'Display name updated successfully',
+      data: group,
+    };
+  } catch (error) {
+    console.error('Error updating display name:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    set.status = errorMessage.includes('Only group owners and admins') ? 403 : 
+                 errorMessage.includes('Group not found') ? 404 : 500;
+    return {
+      message: errorMessage,
+      error: errorMessage,
+    };
+  }
+};
+
+// ============================================================================
+// POST endpoint: Create a group message (owner/admin only)
+// ============================================================================
+
+export const createMessagePayload = {
+  params: t.Object({
+    id: t.String(), // Group ID
+  }),
+  body: t.Object({
+    message: t.String(),
+    isPinned: t.Optional(t.Boolean()),
+  }),
+};
+
+const createMessageType = t.Object(createMessagePayload);
+export type CreateMessageContext = Omit<Context, 'params' | 'body'> & Static<typeof createMessageType> & { user?: { stytchId: string; userId: Types.ObjectId | null }; set: SetStatus };
+
+export const createMessage = async ({ set, params, body, user }: CreateMessageContext) => {
+  if (!user || !user.userId) {
+    set.status = 401;
+    return {
+      message: 'Unauthorized - user not found',
+      data: null,
+    };
+  }
+
+  const { id } = params;
+  const { message, isPinned } = body;
+
+  try {
+    const groupMessage = await groupMessageOperations.createMessage(
+      id,
+      user.userId,
+      message,
+      isPinned || false
+    );
+
+    // Re-fetch with population
+    const populatedMessage = await groupMessageOperations.getMessageById(String(groupMessage._id));
+
+    set.status = 201;
+    return {
+      message: 'Message created successfully',
+      data: populatedMessage || groupMessage,
+    };
+  } catch (error) {
+    console.error('Error creating message:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    set.status = errorMessage.includes('Only group owners and admins') ? 403 : 500;
+    return {
+      message: errorMessage,
+      error: errorMessage,
+    };
+  }
+};
+
+// ============================================================================
+// PUT endpoint: Update a group message (owner/admin only)
+// ============================================================================
+
+export const updateMessagePayload = {
+  params: t.Object({
+    id: t.String(), // Group ID
+    messageId: t.String(), // Message ID
+  }),
+  body: t.Object({
+    message: t.String(),
+  }),
+};
+
+const updateMessageType = t.Object(updateMessagePayload);
+export type UpdateMessageContext = Omit<Context, 'params' | 'body'> & Static<typeof updateMessageType> & { user?: { stytchId: string; userId: Types.ObjectId | null }; set: SetStatus };
+
+export const updateMessage = async ({ set, params, body, user }: UpdateMessageContext) => {
+  if (!user || !user.userId) {
+    set.status = 401;
+    return {
+      message: 'Unauthorized - user not found',
+      data: null,
+    };
+  }
+
+  const { id, messageId } = params;
+  const { message } = body;
+
+  try {
+    const groupMessage = await groupMessageOperations.updateMessage(
+      messageId,
+      user.userId,
+      message
+    );
+
+    // Re-fetch with population
+    const populatedMessage = await groupMessageOperations.getMessageById(messageId);
+
+    set.status = 200;
+    return {
+      message: 'Message updated successfully',
+      data: populatedMessage || groupMessage,
+    };
+  } catch (error) {
+    console.error('Error updating message:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    set.status = errorMessage.includes('Only group owners and admins') ? 403 : 
+                 errorMessage.includes('Message not found') ? 404 : 500;
+    return {
+      message: errorMessage,
+      error: errorMessage,
+    };
+  }
+};
+
+// ============================================================================
+// GET endpoint: Get top message for a group
+// ============================================================================
+
+export const getTopMessagePayload = {
+  params: t.Object({
+    id: t.String(),
+  }),
+};
+
+const getTopMessageType = t.Object(getTopMessagePayload);
+export type GetTopMessageContext = Omit<Context, 'params'> & Static<typeof getTopMessageType> & { set: SetStatus };
+
+export const getTopMessage = async ({ set, params }: GetTopMessageContext) => {
+  const { id } = params;
+
+  try {
+    const message = await groupMessageOperations.getTopMessage(id);
+
+    set.status = 200;
+    return {
+      message: 'Top message retrieved successfully',
+      data: message,
+    };
+  } catch (error) {
+    console.error('Error getting top message:', error);
+    set.status = 500;
+    return {
+      message: 'Error retrieving top message',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+};
+
+// ============================================================================
+// GET endpoint: Get all messages for a group (for future messages tab)
+// ============================================================================
+
+export const getAllMessagesPayload = {
+  params: t.Object({
+    id: t.String(),
+  }),
+};
+
+const getAllMessagesType = t.Object(getAllMessagesPayload);
+export type GetAllMessagesContext = Omit<Context, 'params'> & Static<typeof getAllMessagesType> & { set: SetStatus };
+
+export const getAllMessages = async ({ set, params }: GetAllMessagesContext) => {
+  const { id } = params;
+
+  try {
+    const messages = await groupMessageOperations.getAllMessages(id);
+
+    set.status = 200;
+    return {
+      message: 'Messages retrieved successfully',
+      data: messages,
+    };
+  } catch (error) {
+    console.error('Error getting messages:', error);
+    set.status = 500;
+    return {
+      message: 'Error retrieving messages',
       error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
