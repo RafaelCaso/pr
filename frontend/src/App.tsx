@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 import { Header } from './ui/Header'
 import { Settings } from './ui/Settings'
@@ -9,12 +9,38 @@ import { GroupPage } from './ui/GroupPage'
 import { PublicGroupsPage } from './ui/PublicGroupsPage'
 import { GroupSearchPage } from './ui/GroupSearchPage'
 import { CreateGroupPage } from './ui/CreateGroupPage'
+import { FeedbackPage } from './ui/FeedbackPage'
 
-type Page = 'landing' | 'settings' | 'prayerList' | 'groups' | 'group' | 'publicGroups' | 'searchGroups' | 'createGroup'
+type Page = 'landing' | 'settings' | 'prayerList' | 'groups' | 'group' | 'publicGroups' | 'searchGroups' | 'createGroup' | 'feedback'
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing')
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
+
+  // Handle URL-based routing for /feedback
+  useEffect(() => {
+    const pathname = window.location.pathname
+    if (pathname === '/feedback') {
+      setCurrentPage('feedback')
+      // Update URL without reload
+      window.history.pushState({}, '', '/feedback')
+    }
+  }, [])
+
+  // Listen for browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const pathname = window.location.pathname
+      if (pathname === '/feedback') {
+        setCurrentPage('feedback')
+      } else {
+        setCurrentPage('landing')
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
 
   const navigateToGroup = (groupId: string) => {
     setSelectedGroupId(groupId)
@@ -66,6 +92,8 @@ function App() {
           onBack={navigateToGroups}
           onSuccess={navigateToGroup}
         />
+      ) : currentPage === 'feedback' ? (
+        <FeedbackPage />
       ) : (
         <LandingPage />
       )}

@@ -1,6 +1,7 @@
 import { userRoutes } from './routes/User.route';
 import { prayerRequestRoutes } from './routes/PrayerRequest.route';
 import { groupRoutes } from './routes/Group.route';
+import { feedbackRoutes } from './routes/Feedback.route';
 import { setupGlobalErrorHandlers } from './util';
 import { Elysia } from 'elysia';
 import { cors } from '@elysiajs/cors';
@@ -31,6 +32,7 @@ const app = new Elysia()
   .group('/user', app => app.use(userRoutes))
   .group('/prayer-request', app => app.use(prayerRequestRoutes))
   .group('/group', app => app.use(groupRoutes))
+  .group('/feedback', app => app.use(feedbackRoutes))
 
 // Start the server
 app.listen({ port: process.env.PORT || 3000 });
