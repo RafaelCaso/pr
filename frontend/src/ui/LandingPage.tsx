@@ -126,6 +126,27 @@ export const LandingPage = () => {
             </div>
           )}
         </div>
+        
+        <div className="card" style={{ marginTop: 'var(--spacing-2xl)' }}>
+          <h2 style={{ 
+            fontSize: 'var(--font-size-lg)', 
+            fontWeight: 'var(--font-weight-semibold)',
+            marginBottom: 'var(--spacing-base)',
+            color: 'var(--color-text-primary)'
+          }}>
+            Recent Changes
+          </h2>
+          <ul style={{ 
+            paddingLeft: 'var(--spacing-lg)',
+            margin: 0,
+            color: 'var(--color-text-secondary)',
+            lineHeight: 'var(--line-height-relaxed)'
+          }}>
+            <li style={{ marginBottom: 'var(--spacing-sm)' }}>
+              <strong style={{ color: 'var(--color-text-primary)' }}>Mon Nov 24:</strong> User sessions now persist for 30 days. You'll stay logged in unless you manually log out.
+            </li>
+          </ul>
+        </div>
       </div>
       {showFeedbackModal && (
         <FeedbackFormModal onClose={() => setShowFeedbackModal(false)} />
