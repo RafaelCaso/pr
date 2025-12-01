@@ -10,9 +10,10 @@ interface HeaderProps {
   onShowPrayerList?: () => void;
   onShowGroups?: () => void;
   onShowLanding?: () => void;
+  onShowBible?: () => void;
 }
 
-export const Header = ({ onShowSettings, onShowPrayerList, onShowGroups, onShowLanding }: HeaderProps = {}) => {
+export const Header = ({ onShowSettings, onShowPrayerList, onShowGroups, onShowLanding, onShowBible }: HeaderProps = {}) => {
   const { session } = useStytchSession();
   const stytch = useStytch();
   const [showLogin, setShowLogin] = useState(false);
@@ -48,6 +49,12 @@ export const Header = ({ onShowSettings, onShowPrayerList, onShowGroups, onShowL
   const handleGroups = () => {
     if (onShowGroups) {
       onShowGroups();
+    }
+  };
+
+  const handleBible = () => {
+    if (onShowBible) {
+      onShowBible();
     }
   };
 
@@ -100,6 +107,9 @@ export const Header = ({ onShowSettings, onShowPrayerList, onShowGroups, onShowL
               </DropdownMenu.Item>
               <DropdownMenu.Item className="dropdown-item" onClick={handlePrayerList}>
                 Prayer List
+              </DropdownMenu.Item>
+              <DropdownMenu.Item className="dropdown-item" onClick={handleBible}>
+                Bible
               </DropdownMenu.Item>
               <DropdownMenu.Item className="dropdown-item" onClick={handleSettings}>
                 Settings
