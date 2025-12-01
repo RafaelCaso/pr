@@ -10,8 +10,9 @@ import { PublicGroupsPage } from './ui/PublicGroupsPage'
 import { GroupSearchPage } from './ui/GroupSearchPage'
 import { CreateGroupPage } from './ui/CreateGroupPage'
 import { FeedbackPage } from './ui/FeedbackPage'
+import { BiblePage } from './ui/BiblePage'
 
-type Page = 'landing' | 'settings' | 'prayerList' | 'groups' | 'group' | 'publicGroups' | 'searchGroups' | 'createGroup' | 'feedback'
+type Page = 'landing' | 'settings' | 'prayerList' | 'groups' | 'group' | 'publicGroups' | 'searchGroups' | 'createGroup' | 'feedback' | 'bible'
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing')
@@ -59,6 +60,7 @@ function App() {
         onShowPrayerList={() => setCurrentPage('prayerList')}
         onShowGroups={navigateToGroups}
         onShowLanding={() => setCurrentPage('landing')}
+        onShowBible={() => setCurrentPage('bible')}
       />
       {currentPage === 'settings' ? (
         <Settings onBack={() => setCurrentPage('landing')} />
@@ -94,6 +96,8 @@ function App() {
         />
       ) : currentPage === 'feedback' ? (
         <FeedbackPage />
+      ) : currentPage === 'bible' ? (
+        <BiblePage onBack={() => setCurrentPage('landing')} />
       ) : (
         <LandingPage />
       )}
