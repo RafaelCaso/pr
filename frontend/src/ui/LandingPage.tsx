@@ -143,6 +143,9 @@ export const LandingPage = () => {
             lineHeight: 'var(--line-height-relaxed)'
           }}>
             <li style={{ marginBottom: 'var(--spacing-sm)' }}>
+              <strong style={{ color: 'var(--color-text-primary)' }}>Mon Dec 1:</strong> Basic Bible API integration - Access the Bible reader from your account menu to read scripture in multiple versions.
+            </li>
+            <li style={{ marginBottom: 'var(--spacing-sm)' }}>
               <strong style={{ color: 'var(--color-text-primary)' }}>Mon Nov 24:</strong> User sessions now persist for 30 days. You'll stay logged in unless you manually log out.
             </li>
           </ul>

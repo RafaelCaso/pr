@@ -52,6 +52,29 @@ export const BiblePage = ({ onBack }: BiblePageProps) => {
     }
   }, [selectedBookId, selectedChapterNumber]);
 
+  // Set default Bible version when versions load (NIV preferred, ESV fallback, then first available)
+  useEffect(() => {
+    if (bibleVersions && bibleVersions.length > 0 && !selectedBibleId) {
+      // Try to find NIV first
+      const niv = bibleVersions.find(v => 
+        v.abbreviation.toUpperCase() === 'NIV' || 
+        v.name.toLowerCase().includes('new international')
+      );
+      
+      // Fall back to ESV if NIV not found
+      const esv = !niv ? bibleVersions.find(v => 
+        v.abbreviation.toUpperCase() === 'ESV' || 
+        v.name.toLowerCase().includes('english standard')
+      ) : null;
+      
+      // Use NIV, ESV, or first available version
+      const defaultBible = niv || esv || bibleVersions[0];
+      if (defaultBible) {
+        setSelectedBibleId(defaultBible.id);
+      }
+    }
+  }, [bibleVersions, selectedBibleId]);
+
   const handleBibleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedBibleId(e.target.value);
   };
